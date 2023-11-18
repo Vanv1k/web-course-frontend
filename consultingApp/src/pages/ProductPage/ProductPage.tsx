@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import testData from '../../data';
 
 interface ProductData {
@@ -45,6 +46,13 @@ interface ProductData {
     return (
         <div>
             <Navbar />
+            <div className="container">
+            <Breadcrumb>
+                    <Breadcrumb.Item href="/">Главная</Breadcrumb.Item>
+                    <Breadcrumb.Item href="#" active>
+                        {data?.Name}
+                    </Breadcrumb.Item>
+                </Breadcrumb>
             <Container style={{marginTop: '10%'}}>
                 <Row>
                     <Col xs={12} md={6}>
@@ -60,6 +68,7 @@ interface ProductData {
                     </Col>
                 </Row>
             </Container>
+            </div>
         </div>
     )
 }

@@ -4,6 +4,7 @@ import Card from '../../widgets/Card/Card'
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react'
 import testData from '../../data';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 interface Data {
     id: number;
@@ -60,7 +61,7 @@ const MainPage: React.FC = () => {
         const maxPriceParam = urlSearchParams.get('maxPrice') || '';
         const parsedMaxPrice = maxPriceParam !== null ? parseInt(maxPriceParam) : null;
 
-        
+
         if (parsedMaxPrice !== maxPrice) {
             setMaxPrice(parsedMaxPrice);
             fetchData(maxPriceParam);
@@ -70,6 +71,9 @@ const MainPage: React.FC = () => {
         <div>
             <Navbar onMaxPriceChange={handleMaxPriceChange} />
             <div className="container">
+                <Breadcrumb>
+                    <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
+                </Breadcrumb>
                 <div className="row">
                     {data?.consultation?.map((item) => (
                         <div key={item.Id} className="col-lg-4 col-md-6 col-sm-12">
