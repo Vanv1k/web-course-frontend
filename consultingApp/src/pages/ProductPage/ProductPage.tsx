@@ -4,9 +4,10 @@ import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
+import testData from '../../data';
 
 interface ProductData {
-    id: number;
+    Id: number;
     Name: string;
     Description: string;
     Image: string;
@@ -35,6 +36,7 @@ interface ProductData {
         const result = await response.json();
         setData(result);
       } catch (error) {
+        setData(testData.consultation[parseInt(id || '0', 10)-1])
         console.error('ошибка при выполннении запроса:', error);
       }
     };

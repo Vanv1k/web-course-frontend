@@ -15,12 +15,22 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
   const [maxPrice, setMaxPrice] = useState('');
 
   const handleMaxPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
     const value = e.target.value;
     setMaxPrice(value);
 
     // Check if onMaxPriceChange is defined before calling it
     if (onMaxPriceChange !== undefined) {
       onMaxPriceChange(value);
+    }
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Вызываем onMaxPriceChange при отправке формы
+    if (onMaxPriceChange && maxPrice.trim() !== '') {
+      onMaxPriceChange(maxPrice);
     }
   };
 
@@ -41,6 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
           <Form
             className="d-flex"
             id="search"
+            onSubmit={handleSearchSubmit} // Добавляем обработчик отправки формы
           >
             <Form.Control
               type="search"
@@ -50,7 +61,15 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
               value={maxPrice}
               onChange={handleMaxPriceChange}
             />
-            <Button variant="outline-success" type="submit">
+            <Button
+              variant="outline-success"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onMaxPriceChange !== undefined) {
+                  onMaxPriceChange(maxPrice);
+                }
+              }}
+            >
               Искать
             </Button>
           </Form>

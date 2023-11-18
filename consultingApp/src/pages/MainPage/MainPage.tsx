@@ -3,6 +3,7 @@ import Navbar from '../../widgets/Navbar/Navbar'
 import Card from '../../widgets/Card/Card'
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react'
+import testData from '../../data';
 
 interface Data {
     id: number;
@@ -13,10 +14,10 @@ interface Data {
         Image: string;
         Price: number;
         Status: string;
-      }[];
+    }[];
 
-  }
-  const MainPage: React.FC = () => {
+}
+const MainPage: React.FC = () => {
     const navigate = useNavigate();
     const [data, setData] = useState<Data | null>({ id: 0, consultation: [] });
     const [maxPrice, setMaxPrice] = useState<number | null>(null);
@@ -30,9 +31,15 @@ interface Data {
             }
 
             const result = await response.json();
-            console.log(result); // Проверьте, что данные приходят корректно
+            console.log(result);
             setData(result);
         } catch (error) {
+            console.log(testData)
+            let result = { ...testData }; // Создаем копию оригинальных данных
+            if (maxPrice) {
+                result.consultation = testData.consultation.filter((consultation) => consultation.Price <= parseInt(maxPrice));
+            }
+            setData(result)
             console.error('ошибка при выполннении запроса:', error);
         }
     };
@@ -51,14 +58,17 @@ interface Data {
         // Получаем значение maxPrice из URL при монтировании компонента
         const urlSearchParams = new URLSearchParams(window.location.search);
         const maxPriceParam = urlSearchParams.get('maxPrice') || '';
-        setMaxPrice(maxPriceParam !== null ? parseInt(maxPriceParam) : null);
-      
-        fetchData(maxPriceParam);
+        const parsedMaxPrice = maxPriceParam !== null ? parseInt(maxPriceParam) : null;
+
         
+        if (parsedMaxPrice !== maxPrice) {
+            setMaxPrice(parsedMaxPrice);
+            fetchData(maxPriceParam);
+        }
     }, [maxPrice]);
     return (
         <div>
-            <Navbar onMaxPriceChange={handleMaxPriceChange}/>
+            <Navbar onMaxPriceChange={handleMaxPriceChange} />
             <div className="container">
                 <div className="row">
                     {data?.consultation?.map((item) => (
