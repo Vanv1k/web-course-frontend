@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: 'https://github.com/Vanv1k/web-course-frontend/tree/React_SPA',
+  base: '/web-course-frontend/',
   plugins: [react()],
   server: {
     proxy: {
