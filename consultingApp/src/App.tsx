@@ -4,7 +4,7 @@ import ProductPage from './pages/ProductPage/ProductPage.tsx';
 
 const App = () => {
   return (
-    <Router basename="https://github.com/Vanv1k/web-course-frontend">
+    <Router basename={window.location.pathname || ''}>
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/consultations/:id" element={<ProductPage />} />
