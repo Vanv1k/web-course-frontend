@@ -1,4 +1,3 @@
-import './ProductPage.css';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom';

@@ -1,4 +1,3 @@
-import './MainPage.css'
 import Navbar from '../../widgets/Navbar/Navbar'
 import Card from '../../widgets/Card/Card'
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +24,7 @@ const MainPage: React.FC = () => {
 
     const fetchData = async (maxPrice?: string) => {
         try {
-            const url = maxPrice ? `/api/consultations?maxPrice=${maxPrice}` : '/api/consultations';
+            const url = maxPrice ? `/api/consultations/?maxPrice=${maxPrice}` : '/api/consultations/';
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);

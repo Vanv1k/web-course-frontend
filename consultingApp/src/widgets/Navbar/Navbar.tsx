@@ -1,11 +1,15 @@
-import './Navbar.css'
+import './styles.css'
 import { ChangeEvent } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import { Navbar as NavB } from 'react-bootstrap';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/auth/authActions';
+
 
 interface NavbarProps {
   onMaxPriceChange?: (value: string) => void; // Define the prop type
@@ -13,6 +17,15 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
   const [maxPrice, setMaxPrice] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  // const isBrowser = typeof window !== 'undefined';
+  // Проверяем, что окно определено, а также убеждаемся, что document.cookie тоже определен
+  // const token = isBrowser ? (
+  //   (document.cookie?.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1] || '')
+  // ) : '';
+  // console.log(token)
+  // console.log(document.cookie)
 
   const handleMaxPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
@@ -34,10 +47,22 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
     }
   };
 
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+  
+    try {
+      await dispatch(logout());
+      window.location.reload();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
+
   return (
     <NavB expand="lg" bg="dark" data-bs-theme="dark" className="bg-body-tertiary">
       <Container fluid style={{ marginLeft: '5%' }}>
-        <NavB.Brand href="/">IT Services</NavB.Brand>
+        <NavB.Brand className='navbar-link' href="/">IT Services</NavB.Brand>
         <NavB.Toggle aria-controls="navbarScroll" />
         <NavB.Collapse id="navbarScroll">
           <Nav
@@ -45,8 +70,13 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
             style={{ maxHeight: '100px' }}
             navbarScroll
           >
-            <Nav.Link href="/">Главная</Nav.Link>
-            <Nav.Link href="#action2">Корзина</Nav.Link>
+            <Nav.Link className='navbar-link' href="/">Главная</Nav.Link>
+            {window.localStorage.getItem("accessToken") ? (
+                <Nav.Link className='navbar-link' href="/requests">
+                  Заявки
+              </Nav.Link>
+            ) : null}
+           
           </Nav>
           <Form
             className="d-flex"
@@ -73,6 +103,31 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
               Искать
             </Button>
           </Form>
+          <Nav>
+          {window.localStorage.getItem("accessToken") ? (
+                <Nav.Link className='navbar-link' href="/web-course-frontend/basket">
+                  Корзина
+                </Nav.Link>
+            ) : null}
+            {window.localStorage.getItem("accessToken") ? (
+              <>
+                <Nav.Link className='navbar-link danger' onClick={handleLogout}>
+                  {/* тут онклик */}
+                  Выйти
+                </Nav.Link>
+              </>
+            ) : (
+              <>
+                <Nav.Link className='navbar-link' href="/web-course-frontend/auth/login">
+                  Войти
+                </Nav.Link>
+                <Nav.Link className='navbar-link' href="/web-course-frontend/auth/registration">
+                  Зарегестрироваться
+                </Nav.Link>
+              </>
+            )
+            }
+          </Nav>
         </NavB.Collapse>
       </Container>
     </NavB>
