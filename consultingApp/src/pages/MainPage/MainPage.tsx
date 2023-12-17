@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react'
 import testData from '../../data';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { Link } from 'react-router-dom';
 
 interface Data {
     id: number;
@@ -71,9 +72,9 @@ const MainPage: React.FC = () => {
         <div>
             <Navbar onMaxPriceChange={handleMaxPriceChange} />
             <div className="container">
-                <Breadcrumb>
-                    <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
-                </Breadcrumb>
+                <Link to="/" style={{ textDecoration: 'none', color: 'grey' }}>
+                    <p>Главная</p>
+                </Link>
                 <div className="row">
                     {data?.consultation?.map((item) => (
                         <div key={item.Id} className="col-lg-4 col-md-6 col-sm-12">
