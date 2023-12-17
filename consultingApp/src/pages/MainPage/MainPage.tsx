@@ -25,12 +25,24 @@ const MainPage: React.FC = () => {
     const fetchData = async (maxPrice?: string) => {
         try {
             const url = maxPrice ? `/api/consultations/?maxPrice=${maxPrice}` : '/api/consultations/';
-            const response = await fetch(url);
+            let response
+            if (!localStorage.getItem("accessToken")) {
+                response = await fetch(url);
+            } else {
+                response = await fetch(url, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                    },
+                });
+                
+            }
             if (!response.ok) {
                 throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
             }
 
+
             const result = await response.json();
+            localStorage.setItem("ActiveRequestId", result?.ActiveRequestId?.toString() || '');
             console.log(result);
             setData(result);
         } catch (error) {
@@ -53,6 +65,8 @@ const MainPage: React.FC = () => {
 
         fetchData(maxPriceString); // Вызывайте fetchData при изменении maxPrice
     };
+
+
 
     useEffect(() => {
         // Получаем значение maxPrice из URL при монтировании компонента

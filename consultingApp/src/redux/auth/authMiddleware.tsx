@@ -1,5 +1,5 @@
 import { Middleware } from "redux";
-import { login, logout } from "./authActions";
+import { login, logout, register } from "./authActions";
 import { loginSuccess, loginFailure } from "./authSlice";
 import axios from "axios";
 
@@ -56,7 +56,35 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
             // Может потребоваться диспатчить дополнительные действия в случае ошибки
             throw error;
         }
+    } else if (register.match(action)) {
+        try {
+            const { userName,
+                userLogin,
+                phoneNumber,
+                email,
+                password, } = action.payload;
+            const response = await axios.post(`${API_BASE_URL}/auth/registration`, {
+               "name": userName,
+               "login": userLogin,
+               "phoneNumber": phoneNumber,
+               "email": email,
+               "pass": password,
+            });
+
+            if (response.status === 200) {
+                store.dispatch(loginSuccess()); // Dispatch your success action
+                const token = response.data.access_token;
+                localStorage.setItem("accessToken", token);
+            } else {
+                store.dispatch(loginFailure()); // Dispatch your failure action
+            }
+        } catch (error) {
+            console.error("Error during registration:", error);
+            store.dispatch(loginFailure());
+            throw error;
+        }
     }
+
 
     return next(action);
 };

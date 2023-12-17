@@ -15,6 +15,7 @@ interface NavbarProps {
   onMaxPriceChange?: (value: string) => void; // Define the prop type
 }
 
+
 const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
   const [maxPrice, setMaxPrice] = useState('');
   const dispatch = useDispatch();
@@ -72,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
           >
             <Nav.Link className='navbar-link' href="/">Главная</Nav.Link>
             {window.localStorage.getItem("accessToken") ? (
-                <Nav.Link className='navbar-link' href="/requests">
+                <Nav.Link className='navbar-link' href="/web-course-frontend/requests">
                   Заявки
               </Nav.Link>
             ) : null}
@@ -105,7 +106,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
           </Form>
           <Nav>
           {window.localStorage.getItem("accessToken") ? (
-                <Nav.Link className='navbar-link' href="/web-course-frontend/basket">
+                <Nav.Link className='navbar-link' href="/web-course-frontend/shopping-cart">
                   Корзина
                 </Nav.Link>
             ) : null}
@@ -122,7 +123,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
                   Войти
                 </Nav.Link>
                 <Nav.Link className='navbar-link' href="/web-course-frontend/auth/registration">
-                  Зарегестрироваться
+                  Зарегистрироваться
                 </Nav.Link>
               </>
             )

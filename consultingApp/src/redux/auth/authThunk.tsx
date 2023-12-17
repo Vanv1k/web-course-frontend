@@ -25,3 +25,27 @@ export const login = createAsyncThunk(
     }
   }
 );
+
+export const register = createAsyncThunk(
+  "auth/register",
+  async ({ userName,userLogin,email,phoneNumber, password }: {userName: string; userLogin: string;
+    email: string; phoneNumber: string; password: string}) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/registration`, {
+        userName,
+        userLogin,
+        phoneNumber,
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        return { userLogin };
+      } else {
+        throw new Error("Registration failed");
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+);
