@@ -10,6 +10,7 @@ interface CardProps {
     description: string;
     image: string;
     price: number;
+    buttonAddClicked: () => void;
 }
 
 const MAX_DESCRIPTION_LENGTH = 100;
@@ -20,7 +21,7 @@ const Card: React.FC<CardProps> = (props) => {
         : props.description;
 
     const handleAddToCard = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        
+        console.log(event)
         try {
             event.preventDefault();
             await axios.post(
@@ -32,6 +33,7 @@ const Card: React.FC<CardProps> = (props) => {
                     },
                 }
             );
+            props.buttonAddClicked()
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -39,7 +41,7 @@ const Card: React.FC<CardProps> = (props) => {
 
     return (
 
-        <CardBootstrap className="card-container" style={{ width: '18rem', marginTop: '3rem', margin: '10% 10% 5% 10%' }}>
+        <CardBootstrap className="card-container" style={{ width: '18rem', marginTop: '3rem', margin: '8% 10% 5% 10%' }}>
             <Link className='link' to={`/consultations/${props.id}`}>
                 <CardBootstrap.Img variant="top" src={props.image} />
                 <CardBootstrap.Body>

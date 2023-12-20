@@ -1,6 +1,6 @@
 import { Middleware } from "redux";
 import { login, logout, register } from "./authActions";
-import { loginSuccess, loginFailure } from "./authSlice";
+import { loginSuccess, loginFailure, setRole } from "./authSlice";
 import axios from "axios";
 
 const API_BASE_URL = "/api";
@@ -21,8 +21,8 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
                 console.log('loginSuccess');
                 store.dispatch(loginSuccess());
                 const token = response.data.access_token;
-                console.log('Token:', token); // Добавлен вывод
                 localStorage.setItem("accessToken", token);
+                store.dispatch(setRole(response.data.role))
             } else {
                 console.log('loginFailure');
                 store.dispatch(loginFailure());
@@ -64,17 +64,18 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
                 email,
                 password, } = action.payload;
             const response = await axios.post(`${API_BASE_URL}/auth/registration`, {
-               "name": userName,
-               "login": userLogin,
-               "phoneNumber": phoneNumber,
-               "email": email,
-               "pass": password,
+                "name": userName,
+                "login": userLogin,
+                "phoneNumber": phoneNumber,
+                "email": email,
+                "pass": password,
             });
 
             if (response.status === 200) {
                 store.dispatch(loginSuccess()); // Dispatch your success action
                 const token = response.data.access_token;
                 localStorage.setItem("accessToken", token);
+                store.dispatch(setRole(response.data.role))
             } else {
                 store.dispatch(loginFailure()); // Dispatch your failure action
             }

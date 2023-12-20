@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Table from 'react-bootstrap/Table';
 import CartItem from '../../widgets/CardItem/CartItem';
-import { Button } from 'react-bootstrap';
+import { Button, Modal, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 interface CartItem {
@@ -13,6 +14,12 @@ interface CartItem {
 
 const ShoppingCartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [consultationTime, setConsultationTime] = useState("");
+  const [consultationPlace, setConsultationPlace] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -44,6 +51,134 @@ const ShoppingCartPage: React.FC = () => {
     }
   };
 
+  const handleDeleteCart = async () => {
+    try {
+      await axios.delete(`/api/requests/delete/${localStorage.getItem("ActiveRequestId")}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      navigate("/")
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  const handleSend = () => {
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+  };
+
+  const handleFormRequest = async (companyName: string, consultationPlace: string, consultationTime: string) => {
+    const currentTime = new Date();
+    const selectedTime = new Date(consultationTime);
+  
+    if (selectedTime <= currentTime) {
+      setError('Выберите время, которое позже текущего времени.');
+      return;
+    }
+    
+    if (!consultationPlace || !companyName || !consultationTime) {
+      setError('Заполните поля.');
+      return;
+    }
+
+    try {
+      await axios.put(
+        `/api/requests/update/${localStorage.getItem("ActiveRequestId")}`,
+        {
+          "consultation_place": consultationPlace,
+          "consultation_time": consultationTime,
+          "company_name": companyName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      try {
+        await axios.put(
+          `/api/requests/${localStorage.getItem("ActiveRequestId")}/user/update-status`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+        setShowModal(false);
+        navigate("/")
+      } catch (error) {
+        setError('Ошибка при отправке формы. Попробуйте позже')
+        console.error('Error fetching data:', error);
+      }
+      
+    } catch (error) {
+      setError('Ошибка в вводе данных')
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  const renderAdditionalFields = () => {
+    return (
+      <Modal show={showModal} onHide={handleModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Формирование заявки</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            {/* Добавьте дополнительные поля ввода здесь */}
+            <Form.Group className="mb-3" controlId="formAdditionalField1">
+              <Form.Label>Название компании</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Название компании"
+                name="companyName"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formAdditionalField2">
+              <Form.Label>Место консультации</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Место проведения консультации"
+                name="consultationPlace"
+                value={consultationPlace}
+                onChange={(e) => setConsultationPlace(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formAdditionalField3">
+              <Form.Label>Время консультации</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Формат: 2023-12-31 18:30"
+                name="consultationTime"
+                value={consultationTime}
+                onChange={(e) => setConsultationTime(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+          {error && <div className="error-message">{error}</div>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose}>
+            Закрыть
+          </Button>
+          <Button variant="primary" onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
+            Отправить
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  };
+
   const renderCart = () => {
     return (
       <>
@@ -65,6 +200,10 @@ const ShoppingCartPage: React.FC = () => {
         <Button variant="primary" onClick={handleSend}>
           Отправить
         </Button>
+        <Button style={{ marginLeft: '80%' }} variant="danger" onClick={handleDeleteCart}>
+          Очистить корзину
+        </Button>
+        {renderAdditionalFields()}
       </>
     );
   };
@@ -77,22 +216,7 @@ const ShoppingCartPage: React.FC = () => {
     );
   };
 
-  const handleSend = async () => {
-    try {
-      await axios.put(
-        `/api/requests/${localStorage.getItem("ActiveRequestId")}/user/update-status`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-      fetchData();
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+
 
   return (
     <div>

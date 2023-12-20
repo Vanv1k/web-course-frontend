@@ -1,56 +1,23 @@
 import './styles.css'
-import { ChangeEvent } from 'react';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import { Navbar as NavB } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from 'react-redux';
 import { logout } from '../../redux/auth/authActions';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveRequestID, setMaxPriceFilter } from '../../redux/filterAndActiveRequestID/actions';
+import { RootState } from '../../redux/store';
+import { Link } from 'react-router-dom';
 
-
-interface NavbarProps {
-  onMaxPriceChange?: (value: string) => void; // Define the prop type
-}
-
-
-const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
-  const [maxPrice, setMaxPrice] = useState('');
+const Navbar = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  // const isBrowser = typeof window !== 'undefined';
-  // Проверяем, что окно определено, а также убеждаемся, что document.cookie тоже определен
-  // const token = isBrowser ? (
-  //   (document.cookie?.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1] || '')
-  // ) : '';
-  // console.log(token)
-  // console.log(document.cookie)
+  const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
 
-  const handleMaxPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    const value = e.target.value;
-    setMaxPrice(value);
-
-    // Check if onMaxPriceChange is defined before calling it
-    if (onMaxPriceChange !== undefined) {
-      onMaxPriceChange(value);
-    }
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Вызываем onMaxPriceChange при отправке формы
-    if (onMaxPriceChange && maxPrice.trim() !== '') {
-      onMaxPriceChange(maxPrice);
-    }
-  };
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
-  
+
     try {
       await dispatch(logout());
       window.location.reload();
@@ -59,11 +26,10 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
     }
   };
 
-
   return (
-    <NavB expand="lg" bg="dark" data-bs-theme="dark" className="bg-body-tertiary">
+    <NavB expand="lg" bg="dark" data-bs-theme="dark" className="bg-body-tertiary nav sticky-top">
       <Container fluid style={{ marginLeft: '5%' }}>
-        <NavB.Brand className='navbar-link' href="/">IT Services</NavB.Brand>
+        <Link className='navbar-link logo' to="/">IT Services</Link>
         <NavB.Toggle aria-controls="navbarScroll" />
         <NavB.Collapse id="navbarScroll">
           <Nav
@@ -71,63 +37,34 @@ const Navbar: React.FC<NavbarProps> = ({ onMaxPriceChange }) => {
             style={{ maxHeight: '100px' }}
             navbarScroll
           >
-            <Nav.Link className='navbar-link' href="/">Главная</Nav.Link>
+            <Link className='navbar-link' to="/">Главная</Link>
             {window.localStorage.getItem("accessToken") ? (
-                <Nav.Link className='navbar-link' href="/web-course-frontend/requests">
-                  Заявки
-              </Nav.Link>
+              <Link className='navbar-link' to="/requests">
+                Заявки
+              </Link>
             ) : null}
-           
+
           </Nav>
-          <Form
-            className="d-flex"
-            id="search"
-            onSubmit={handleSearchSubmit} // Добавляем обработчик отправки формы
-          >
-            <Form.Control
-              type="search"
-              placeholder="Поиск по максимальной цене"
-              className="me-2"
-              aria-label="Search"
-              value={maxPrice}
-              onChange={handleMaxPriceChange}
-            />
-            <Button
-              variant="outline-success"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onMaxPriceChange !== undefined) {
-                  onMaxPriceChange(maxPrice);
-                }
-              }}
-            >
-              Искать
-            </Button>
-          </Form>
           <Nav>
-          {window.localStorage.getItem("accessToken") ? (
-                <Nav.Link className='navbar-link' href="/web-course-frontend/shopping-cart">
-                  Корзина
-                </Nav.Link>
-            ) : null}
-            {window.localStorage.getItem("accessToken") ? (
-              <>
-                <Nav.Link className='navbar-link danger' onClick={handleLogout}>
-                  {/* тут онклик */}
-                  Выйти
-                </Nav.Link>
-              </>
-            ) : (
-              <>
-                <Nav.Link className='navbar-link' href="/web-course-frontend/auth/login">
-                  Войти
-                </Nav.Link>
-                <Nav.Link className='navbar-link' href="/web-course-frontend/auth/registration">
-                  Зарегистрироваться
-                </Nav.Link>
-              </>
-            )
-            }
+            <div className='right-side'>
+              {window.localStorage.getItem("accessToken") ? (
+                <>
+                  <Link className='navbar-link danger exit' onClick={handleLogout} to='/'>
+                    Выйти
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link className='navbar-link' to="/auth/login">
+                    Войти
+                  </Link>
+                  <Link className='navbar-link register' to="/auth/registration">
+                    Зарегистрироваться
+                  </Link>
+                </>
+              )
+              }
+            </div>
           </Nav>
         </NavB.Collapse>
       </Container>

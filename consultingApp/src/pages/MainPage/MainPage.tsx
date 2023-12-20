@@ -1,9 +1,19 @@
 import Navbar from '../../widgets/Navbar/Navbar'
 import Card from '../../widgets/Card/Card'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react'
+import { ChangeEvent } from 'react';
 import testData from '../../data';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveRequestID, setMaxPriceFilter } from '../../redux/filterAndActiveRequestID/actions';
+import { loginSuccess, loginFailure } from '../../redux/auth/authSlice';
+import { RootState } from '../../redux/store';
+import CartImg from '../../assets/cart-check-svgrepo-com.svg';
+import EmptyCartImg from '../../assets/cart-cross-svgrepo-com.svg'
+import axios from 'axios';
+import './styles.css'
 
 interface Data {
     id: number;
@@ -18,13 +28,15 @@ interface Data {
 
 }
 const MainPage: React.FC = () => {
-    const navigate = useNavigate();
     const [data, setData] = useState<Data | null>({ id: 0, consultation: [] });
-    const [maxPrice, setMaxPrice] = useState<number | null>(null);
-
-    const fetchData = async (maxPrice?: string) => {
+    const dispatch = useDispatch();
+    const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
+    const activeRequest = useSelector((state: RootState) => state.filterAndActiveId.activeRequestID);
+    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+    const fetchData = async () => {
+        console.log(maxPriceFilter)
         try {
-            const url = maxPrice ? `/api/consultations/?maxPrice=${maxPrice}` : '/api/consultations/';
+            const url = maxPriceFilter ? `/api/consultations/?maxPrice=${maxPriceFilter}` : '/api/consultations/';
             let response
             if (!localStorage.getItem("accessToken")) {
                 response = await fetch(url);
@@ -34,7 +46,7 @@ const MainPage: React.FC = () => {
                         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                     },
                 });
-                
+
             }
             if (!response.ok) {
                 throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
@@ -43,50 +55,60 @@ const MainPage: React.FC = () => {
 
             const result = await response.json();
             localStorage.setItem("ActiveRequestId", result?.ActiveRequestId?.toString() || '');
+            dispatch(setActiveRequestID(result?.ActiveRequestId));
             console.log(result);
             setData(result);
         } catch (error) {
             console.log(testData)
-            let result = { ...testData }; // Создаем копию оригинальных данных
-            if (maxPrice) {
-                result.consultation = testData.consultation.filter((consultation) => consultation.Price <= parseInt(maxPrice));
+            let result = { ...testData };
+            if (maxPriceFilter) {
+                result.consultation = testData.consultation.filter((consultation) => consultation.Price <= parseInt(maxPriceFilter));
             }
             setData(result)
-            console.error('ошибка при выполннении запроса:', error);
+            console.error('ошибка при выполнении запроса:', error);
         }
     };
 
-    const handleMaxPriceChange = (value: string) => {
-        setMaxPrice(value !== '' ? parseInt(value) : null);
-
-        // Обновляем URL с использованием navigate
-        const maxPriceString = value !== '' ? parseInt(value).toString() : '';
-        navigate(`?maxPrice=${maxPriceString}`, { replace: true });
-
-        fetchData(maxPriceString); // Вызывайте fetchData при изменении maxPrice
+    const handleMaxPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const maxPriceString = e.target.value !== '' ? parseInt(e.target.value).toString() : '';
+        dispatch(setMaxPriceFilter(maxPriceString));
     };
 
-
+    const buttonAddClicked = () => {
+        if (!activeRequest) {
+            fetchData()
+        }
+    }
 
     useEffect(() => {
-        // Получаем значение maxPrice из URL при монтировании компонента
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const maxPriceParam = urlSearchParams.get('maxPrice') || '';
-        const parsedMaxPrice = maxPriceParam !== null ? parseInt(maxPriceParam) : null;
-
-
-        if (parsedMaxPrice !== maxPrice) {
-            setMaxPrice(parsedMaxPrice);
-            fetchData(maxPriceParam);
+        fetchData()
+        if (window.localStorage.getItem("accessToken")) {
+            dispatch(loginSuccess())
         }
-    }, [maxPrice]);
+    }, [dispatch, maxPriceFilter]);
+
+
     return (
         <div>
-            <Navbar onMaxPriceChange={handleMaxPriceChange} />
+            <Navbar />
             <div className="container">
                 <Breadcrumb>
                     <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
                 </Breadcrumb>
+                <Form
+                    className="d-flex"
+                    id="search"
+                    style={{ width: "20%", minWidth: "250px", marginTop: "0.7%" }}
+                >
+                    <Form.Control
+                        type="search"
+                        placeholder="Поиск по максимальной цене"
+                        className="me-2"
+                        aria-label="Search"
+                        value={maxPriceFilter}
+                        onChange={handleMaxPriceChange}
+                    />
+                </Form>
                 <div className="row">
                     {data?.consultation?.map((item) => (
                         <div key={item.Id} className="col-lg-4 col-md-6 col-sm-12">
@@ -96,10 +118,22 @@ const MainPage: React.FC = () => {
                                 description={item.Description}
                                 image={item.Image}
                                 price={item.Price}
+                                buttonAddClicked={buttonAddClicked}
                             />
                         </div>
                     ))}
                 </div>
+                {isAuthenticated ?
+                    activeRequest ?
+                        <Link className='cart' to='/shopping-cart'>
+                            <img src={CartImg} />
+                        </Link> :
+                        <Link className='cart empty' to='/shopping-cart' >
+                            <img src={EmptyCartImg} />
+                        </Link>
+                    : null
+                }
+
             </div>
         </div>
     )
