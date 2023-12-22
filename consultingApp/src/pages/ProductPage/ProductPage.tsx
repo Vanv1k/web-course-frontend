@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
+import Loader from '../../widgets/Loader/Loader';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import testData from '../../data';
 
@@ -41,6 +42,12 @@ interface ProductData {
       }
     };
     console.log(data);
+
+    if (!data) {
+      return (
+        <Loader/>
+      );
+    }
 
     return (
         <div>

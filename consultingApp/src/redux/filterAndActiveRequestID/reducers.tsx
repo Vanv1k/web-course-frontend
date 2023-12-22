@@ -4,6 +4,7 @@ import { combineReducers, AnyAction } from 'redux';
 import {
   SET_ACTIVE_REQUEST_ID,
   SET_MAX_PRICE_FILTER,
+  SET_NUM_OF_PROD_IN_REQ,
 } from './actions';
 
 const activeRequestIDReducer = (state: number | null = null, action: AnyAction) => {
@@ -24,7 +25,17 @@ const maxPriceFilterReducer = (state: string | '' = '', action: AnyAction) => {
   }
 };
 
+const numOfConsReducer = (state: number | 0 = 0, action: AnyAction) => {
+  switch (action.type) {
+    case SET_NUM_OF_PROD_IN_REQ:
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
 export const filterAndActiveIdReducer = combineReducers({
   activeRequestID: activeRequestIDReducer,
   maxPriceFilter: maxPriceFilterReducer,
+  numOfCons: numOfConsReducer,
 });

@@ -19,6 +19,7 @@ const LoginPage = () => {
         try {
             await dispatch(login({ userLogin, password }));
             navigate("/");
+            localStorage.setItem("name", userLogin);
           } catch (error) {
             console.error("Error during login:", error);
             setError("Неверный логин или пароль");

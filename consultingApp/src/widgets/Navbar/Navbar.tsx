@@ -49,9 +49,20 @@ const Navbar = () => {
             <div className='right-side'>
               {window.localStorage.getItem("accessToken") ? (
                 <>
-                  <Link className='navbar-link danger exit' onClick={handleLogout} to='/'>
-                    Выйти
-                  </Link>
+                  {window.localStorage.getItem("name") ? (
+                    <div style={{display: 'flex', marginTop: '20%'}}>
+                      <p className='navbar-link name'>
+                        {localStorage.getItem("name")}
+                      </p>
+                      <Link className='navbar-link danger exit' onClick={handleLogout} to='/'>
+                        Выйти
+                      </Link>
+                    </div>
+                  ) :
+                    <Link className='navbar-link danger exit' onClick={handleLogout} to='/'>
+                      Выйти
+                    </Link>
+                  }
                 </>
               ) : (
                 <>

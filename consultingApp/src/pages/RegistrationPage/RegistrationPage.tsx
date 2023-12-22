@@ -49,6 +49,7 @@ const RegistrationPage = () => {
         try {
             await dispatch(register({ userName, userLogin, phoneNumber, email, password }));
             navigate("/");
+            localStorage.setItem("name", userLogin);
         } catch (error) {
             console.error("Error during registration:", error);
             setError("Пользователь с таким логином/телефоном/email уже зарегистрирован");

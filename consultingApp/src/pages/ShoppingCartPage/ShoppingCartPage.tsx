@@ -4,6 +4,10 @@ import Table from 'react-bootstrap/Table';
 import CartItem from '../../widgets/CardItem/CartItem';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../widgets/Loader/Loader';
+import { RootState } from '../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
 import axios from 'axios';
 
 interface CartItem {
@@ -19,6 +23,8 @@ const ShoppingCartPage: React.FC = () => {
   const [consultationTime, setConsultationTime] = useState("");
   const [consultationPlace, setConsultationPlace] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,6 +51,14 @@ const ShoppingCartPage: React.FC = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
+      dispatch(setNumOfProdInReq(numOfCons-1));
+      const currentNumOfCons = localStorage.getItem('numOfCons');
+      const currentNum = currentNumOfCons ? parseInt(currentNumOfCons, 10) : 0;
+      const updatedNumOfCons = currentNum - 1;
+      localStorage.setItem('numOfCons', updatedNumOfCons.toString());
+      if (updatedNumOfCons != numOfCons) {
+          dispatch(setNumOfProdInReq(updatedNumOfCons));
+      }
       fetchData();
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -58,6 +72,9 @@ const ShoppingCartPage: React.FC = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
+      dispatch(setNumOfProdInReq(0));
+      const updatedNumOfCons = 0;
+      localStorage.setItem('numOfCons', updatedNumOfCons.toString());
       navigate("/")
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -75,12 +92,12 @@ const ShoppingCartPage: React.FC = () => {
   const handleFormRequest = async (companyName: string, consultationPlace: string, consultationTime: string) => {
     const currentTime = new Date();
     const selectedTime = new Date(consultationTime);
-  
+
     if (selectedTime <= currentTime) {
       setError('Выберите время, которое позже текущего времени.');
       return;
     }
-    
+
     if (!consultationPlace || !companyName || !consultationTime) {
       setError('Заполните поля.');
       return;
@@ -111,12 +128,15 @@ const ShoppingCartPage: React.FC = () => {
           }
         );
         setShowModal(false);
+        dispatch(setNumOfProdInReq(0));
+        const updatedNumOfCons = 0;
+        localStorage.setItem('numOfCons', updatedNumOfCons.toString());
         navigate("/")
       } catch (error) {
         setError('Ошибка при отправке формы. Попробуйте позже')
         console.error('Error fetching data:', error);
       }
-      
+
     } catch (error) {
       setError('Ошибка в вводе данных')
       console.error('Error fetching data:', error);
@@ -208,11 +228,12 @@ const ShoppingCartPage: React.FC = () => {
     );
   };
 
-  const renderEmptyCart = () => {
+  const renderLoading = () => {
     return (
-      <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
-        <h2>Корзина пуста</h2>
-      </div>
+      <>
+      <Navbar/>
+      <Loader />
+      </>
     );
   };
 
@@ -220,11 +241,10 @@ const ShoppingCartPage: React.FC = () => {
 
   return (
     <div>
-      <Navbar />
-      <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
-        {cartItems?.length > 0 ? renderCart() : renderEmptyCart()}
-
-      </div>
+      {cartItems?.length > 0 ? <> <Navbar /> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
+        {renderCart()}
+      </div> </> : <> {renderLoading()} 
+      <h2 style={{marginTop: "-20%", marginLeft: "5%"}}>Корзина пуста</h2></>}
     </div>
   );
 };

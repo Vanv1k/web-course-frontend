@@ -7,12 +7,12 @@ import { ChangeEvent } from 'react';
 import testData from '../../data';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useDispatch, useSelector } from 'react-redux';
-import { setActiveRequestID, setMaxPriceFilter } from '../../redux/filterAndActiveRequestID/actions';
+import { setActiveRequestID, setMaxPriceFilter, setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
 import { loginSuccess, loginFailure } from '../../redux/auth/authSlice';
 import { RootState } from '../../redux/store';
 import CartImg from '../../assets/cart-check-svgrepo-com.svg';
 import EmptyCartImg from '../../assets/cart-cross-svgrepo-com.svg'
-import axios from 'axios';
+import Loader from '../../widgets/Loader/Loader';
 import './styles.css'
 
 interface Data {
@@ -30,6 +30,7 @@ interface Data {
 const MainPage: React.FC = () => {
     const [data, setData] = useState<Data | null>({ id: 0, consultation: [] });
     const dispatch = useDispatch();
+    const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
     const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
     const activeRequest = useSelector((state: RootState) => state.filterAndActiveId.activeRequestID);
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -85,7 +86,41 @@ const MainPage: React.FC = () => {
         if (window.localStorage.getItem("accessToken")) {
             dispatch(loginSuccess())
         }
+        const currentNumOfCons = localStorage.getItem('numOfCons');
+        const currentNum = currentNumOfCons ? parseInt(currentNumOfCons, 10) : 0;
+        const updatedNumOfCons = currentNum;
+        localStorage.setItem('numOfCons', updatedNumOfCons.toString());
+        if (updatedNumOfCons != numOfCons) {
+            dispatch(setNumOfProdInReq(updatedNumOfCons));
+        }
     }, [dispatch, maxPriceFilter]);
+
+    // if (!data || data?.consultation.length === 0) {
+    //     return (
+    //         <>
+    //             <Loader />
+    //             <div style={{marginTop: "-23%", marginLeft: "9%" }}>
+    //             <Breadcrumb>
+    //                 <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
+    //             </Breadcrumb>
+    //             <Form
+    //                 className="d-flex"
+    //                 id="search"
+    //                 style={{ width: "20%", minWidth: "250px", marginTop: "1%",}}
+    //             >
+    //                 <Form.Control
+    //                     type="search"
+    //                     placeholder="Поиск по максимальной цене"
+    //                     className="me-2"
+    //                     aria-label="Search"
+    //                     value={maxPriceFilter}
+    //                     onChange={handleMaxPriceChange}
+    //                 />
+    //             </Form>
+    //             </div>
+    //         </>
+    //     );
+    // }
 
 
     return (
@@ -109,31 +144,33 @@ const MainPage: React.FC = () => {
                         onChange={handleMaxPriceChange}
                     />
                 </Form>
-                <div className="row">
-                    {data?.consultation?.map((item) => (
-                        <div key={item.Id} className="col-lg-4 col-md-6 col-sm-12">
-                            <Card
-                                id={item.Id}
-                                name={item.Name}
-                                description={item.Description}
-                                image={item.Image}
-                                price={item.Price}
-                                buttonAddClicked={buttonAddClicked}
-                            />
+                {!data || data?.consultation.length === 0 ?
+                    <Loader />
+                    : <>
+                        <div className="row">
+                            {data?.consultation?.map((item) => (
+                                <div key={item.Id} className="col-lg-4 col-md-6 col-sm-12">
+                                    <Card
+                                        id={item.Id}
+                                        name={item.Name}
+                                        description={item.Description}
+                                        image={item.Image}
+                                        price={item.Price}
+                                        buttonAddClicked={buttonAddClicked}
+                                    />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                {isAuthenticated ?
-                    activeRequest ?
-                        <Link className='cart' to='/shopping-cart'>
-                            <img src={CartImg} />
-                        </Link> :
-                        <Link className='cart empty' to='/shopping-cart' >
-                            <img src={EmptyCartImg} />
-                        </Link>
-                    : null
-                }
-
+                        {isAuthenticated ?
+                            (activeRequest && numOfCons > 0) ?
+                                <Link className='cart' to='/shopping-cart'>
+                                    <img src={CartImg} />
+                                </Link> :
+                                <Link className='cart empty' to='/shopping-cart' >
+                                    <img src={EmptyCartImg} />
+                                </Link>
+                            : null
+                        } </>}
             </div>
         </div>
     )
