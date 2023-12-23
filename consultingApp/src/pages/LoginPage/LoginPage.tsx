@@ -2,6 +2,7 @@ import Navbar from '../../widgets/Navbar/Navbar';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import "./styles.css"
+import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -11,23 +12,29 @@ const LoginPage = () => {
     const [userLogin, setUserLogin] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-  
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
-  
+
     const handleLogin = async (userLogin: string, password: string) => {
         try {
             await dispatch(login({ userLogin, password }));
             navigate("/");
             localStorage.setItem("name", userLogin);
-          } catch (error) {
+        } catch (error) {
             console.error("Error during login:", error);
             setError("Неверный логин или пароль");
-          }
+        }
     };
     return (
         <div>
             <Navbar />
+            <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+                <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+                <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+                    / Авторизация
+                </Link>
+            </div>
             <div className='container login-page'>
                 <h1 className='small-h1'>Авторизация</h1>
                 <Form className='login-form'>
@@ -51,10 +58,10 @@ const LoginPage = () => {
                         />
                     </Form.Group>
                     {error && <div className="error-message">{error}</div>}
-                    <Button 
-                    variant="primary" 
-                    type="button"
-                    onClick={() => handleLogin(userLogin, password)}>
+                    <Button
+                        variant="primary"
+                        type="button"
+                        onClick={() => handleLogin(userLogin, password)}>
                         Войти
                     </Button>
                 </Form>

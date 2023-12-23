@@ -26,7 +26,7 @@ const Card: React.FC<CardProps> = (props) => {
     const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
     const dispatch = useDispatch();
 
-    const handleAddToCard = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleAddToCard = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         console.log(event)
         try {
             event.preventDefault();

@@ -5,13 +5,14 @@ import requestsMiddleware from "./request/requestMiddleware";
 import authReducer from "./auth/authSlice";
 import requestReducer from "./request/requestSlice"; // Добавили этот импорт
 import {filterAndActiveIdReducer} from "./filterAndActiveRequestID/reducers"
-
+import { requestFilterReducer } from "./requestFilters/reducers";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     request: requestReducer,
     filterAndActiveId: filterAndActiveIdReducer,
+    requestFilters: requestFilterReducer,
     // Добавьте другие редюсеры, если необходимо
   },
   middleware: (getDefaultMiddleware) =>

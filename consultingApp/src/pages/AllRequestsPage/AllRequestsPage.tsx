@@ -4,6 +4,8 @@ import { getAllRequests } from '../../redux/request/requestActions';
 import { RootState } from '../../redux/store';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Loader from '../../widgets/Loader/Loader';
+import { Link } from 'react-router-dom';
+import { loginSuccess, setRole } from '../../redux/auth/authSlice';
 import Table from 'react-bootstrap/Table';
 
 
@@ -11,7 +13,6 @@ import Table from 'react-bootstrap/Table';
 const AllRequestsPage = () => {
   const dispatch = useDispatch();
   const requests = useSelector((state: RootState) => state.request.data);
-  const status = useSelector((state: RootState) => state.request.status);
 
   const formattedTime = (timestamp: string) => {
     if (timestamp.includes('0001-01-01')) {
@@ -29,22 +30,52 @@ const AllRequestsPage = () => {
 
     return formattedDate
   };
+
+  const fetchData = async () => {
+    try {
+      await dispatch(getAllRequests());
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+    }
+  };
+
   useEffect(() => {
-    dispatch(getAllRequests());
+    fetchData();
+    if (window.localStorage.getItem("accessToken")) {
+      dispatch(loginSuccess())
+    }
+    if (window.localStorage.getItem("role")) {
+      const roleString = window.localStorage.getItem("role");
+      const role = roleString ? parseInt(roleString) : 0;
+      dispatch(setRole(role))
+    }
+    const pollingInterval = setInterval(() => {
+      fetchData();
+    }, 5000);
+    return () => {
+      clearInterval(pollingInterval);
+    };
   }, [dispatch]);
 
   if (!requests || requests.length === 0) {
     return (
       <>
-      <Navbar/>
-      <Loader />
+        <Navbar />
+        <Loader />
       </>
     );
   }
-  
+
   return (
     <div>
       <Navbar />
+      <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+        <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+        <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+          / Заявки
+        </Link>
+      </div>
       <div style={{ margin: '10% 10% 0 10%' }}>
         <Table striped bordered hover>
           <thead>

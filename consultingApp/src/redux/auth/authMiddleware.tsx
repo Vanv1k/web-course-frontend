@@ -9,20 +9,17 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
     if (login.match(action)) {
         try {
             const { userLogin, password } = action.payload;
-            console.log(userLogin, password)
             const response = await axios.post(`${API_BASE_URL}/auth/login`, {
                 "login": userLogin,
                 "password": password,
             });
-
-            console.log('Response:', response); // Добавлен вывод
-
             if (response.status === 200) {
                 console.log('loginSuccess');
                 store.dispatch(loginSuccess());
                 const token = response.data.access_token;
                 localStorage.setItem("accessToken", token);
                 store.dispatch(setRole(response.data.role))
+                localStorage.setItem('role', response.data.role);
                 const updatedNumOfCons = 0;
                 localStorage.setItem('numOfCons', updatedNumOfCons.toString());
             } else {
@@ -49,14 +46,13 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
                 store.dispatch(loginFailure());
                 localStorage.removeItem("accessToken"); // Удаляем токен из локального хранилища
                 localStorage.removeItem("numOfCons");
+                localStorage.removeItem("role");
             } else {
                 console.log('logoutFailure');
-                // Может потребоваться диспатчить дополнительные действия в случае неудачного выхода
             }
         } catch (error) {
             console.log('Error during logout');
             console.error("Error during logout:", error);
-            // Может потребоваться диспатчить дополнительные действия в случае ошибки
             throw error;
         }
     } else if (register.match(action)) {
@@ -79,6 +75,7 @@ const authMiddleware: Middleware = (store) => (next) => async (action) => {
                 const token = response.data.access_token;
                 localStorage.setItem("accessToken", token);
                 store.dispatch(setRole(response.data.role))
+                localStorage.setItem('role', response.data.role);
                 const updatedNumOfCons = 0;
                 localStorage.setItem('numOfCons', updatedNumOfCons.toString());
             } else {

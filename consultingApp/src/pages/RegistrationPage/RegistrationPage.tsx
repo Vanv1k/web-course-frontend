@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from "../../redux/auth/authActions";
 import "./styles.css"
@@ -58,6 +59,12 @@ const RegistrationPage = () => {
     return (
         <div>
             <Navbar />
+            <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+                <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+                <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+                    / Регистрация
+                </Link>
+            </div>
             <div className='container registration-page'>
                 <h1 className='small-h1'>Регистрация</h1>
                 <Form className='registration-form'>

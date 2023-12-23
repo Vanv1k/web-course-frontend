@@ -8,7 +8,7 @@ import testData from '../../data';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveRequestID, setMaxPriceFilter, setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
-import { loginSuccess, loginFailure } from '../../redux/auth/authSlice';
+import { loginSuccess, loginFailure, setRole } from '../../redux/auth/authSlice';
 import { RootState } from '../../redux/store';
 import CartImg from '../../assets/cart-check-svgrepo-com.svg';
 import EmptyCartImg from '../../assets/cart-cross-svgrepo-com.svg'
@@ -86,6 +86,11 @@ const MainPage: React.FC = () => {
         if (window.localStorage.getItem("accessToken")) {
             dispatch(loginSuccess())
         }
+        if (window.localStorage.getItem("role")) {
+            const roleString = window.localStorage.getItem("role");
+            const role = roleString ? parseInt(roleString) : 0;
+            dispatch(setRole(role))
+        }
         const currentNumOfCons = localStorage.getItem('numOfCons');
         const currentNum = currentNumOfCons ? parseInt(currentNumOfCons, 10) : 0;
         const updatedNumOfCons = currentNum;
@@ -95,41 +100,13 @@ const MainPage: React.FC = () => {
         }
     }, [dispatch, maxPriceFilter]);
 
-    // if (!data || data?.consultation.length === 0) {
-    //     return (
-    //         <>
-    //             <Loader />
-    //             <div style={{marginTop: "-23%", marginLeft: "9%" }}>
-    //             <Breadcrumb>
-    //                 <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
-    //             </Breadcrumb>
-    //             <Form
-    //                 className="d-flex"
-    //                 id="search"
-    //                 style={{ width: "20%", minWidth: "250px", marginTop: "1%",}}
-    //             >
-    //                 <Form.Control
-    //                     type="search"
-    //                     placeholder="Поиск по максимальной цене"
-    //                     className="me-2"
-    //                     aria-label="Search"
-    //                     value={maxPriceFilter}
-    //                     onChange={handleMaxPriceChange}
-    //                 />
-    //             </Form>
-    //             </div>
-    //         </>
-    //     );
-    // }
-
-
     return (
         <div>
             <Navbar />
             <div className="container">
-                <Breadcrumb>
-                    <Breadcrumb.Item href="/" active>Главная</Breadcrumb.Item>
-                </Breadcrumb>
+                <Link to="/" style={{ textDecoration: 'none', color: 'grey' }}>
+                    <p>Главная</p>
+                </Link>
                 <Form
                     className="d-flex"
                     id="search"

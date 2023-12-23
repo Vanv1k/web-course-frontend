@@ -1,0 +1,17 @@
+.add-cons {
+    transition: transform 0.2s ease-in-out, color 0.3s ease-in-out;
+    position: fixed;
+    border: none !important;
+    bottom: 3%;
+    right: 3%;
+    height: 70px;
+    width: 70px;
+    box-sizing: border-box;
+    color: white !important;
+    background-color: white !important;
+    padding: 8px !important;
+}
+
+.add-cons:hover {
+    transform: scale(1.03);
+}

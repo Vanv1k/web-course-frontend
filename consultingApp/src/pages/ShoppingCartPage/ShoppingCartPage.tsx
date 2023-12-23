@@ -6,6 +6,7 @@ import { Button, Modal, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../widgets/Loader/Loader';
 import { RootState } from '../../redux/store';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
 import axios from 'axios';
@@ -51,13 +52,13 @@ const ShoppingCartPage: React.FC = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-      dispatch(setNumOfProdInReq(numOfCons-1));
+      dispatch(setNumOfProdInReq(numOfCons - 1));
       const currentNumOfCons = localStorage.getItem('numOfCons');
       const currentNum = currentNumOfCons ? parseInt(currentNumOfCons, 10) : 0;
       const updatedNumOfCons = currentNum - 1;
       localStorage.setItem('numOfCons', updatedNumOfCons.toString());
       if (updatedNumOfCons != numOfCons) {
-          dispatch(setNumOfProdInReq(updatedNumOfCons));
+        dispatch(setNumOfProdInReq(updatedNumOfCons));
       }
       fetchData();
     } catch (error) {
@@ -231,8 +232,8 @@ const ShoppingCartPage: React.FC = () => {
   const renderLoading = () => {
     return (
       <>
-      <Navbar/>
-      <Loader />
+        <Navbar />
+        <Loader />
       </>
     );
   };
@@ -241,10 +242,15 @@ const ShoppingCartPage: React.FC = () => {
 
   return (
     <div>
-      {cartItems?.length > 0 ? <> <Navbar /> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
-        {renderCart()}
-      </div> </> : <> {renderLoading()} 
-      <h2 style={{marginTop: "-20%", marginLeft: "5%"}}>Корзина пуста</h2></>}
+      {cartItems?.length > 0 ? <> <Navbar />         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+        <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+        <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+          / Корзина
+        </Link>
+      </div> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
+          {renderCart()}
+        </div> </> : <> {renderLoading()}
+        <h2 style={{ marginTop: "-20%", marginLeft: "5%" }}>Корзина пуста</h2></>}
     </div>
   );
 };

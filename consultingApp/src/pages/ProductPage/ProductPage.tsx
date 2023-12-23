@@ -4,79 +4,79 @@ import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import Loader from '../../widgets/Loader/Loader';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { Link } from 'react-router-dom';
 import testData from '../../data';
 
 interface ProductData {
-    Id: number;
-    Name: string;
-    Description: string;
-    Image: string;
-    Price: number;
-    Status: string;
+  Id: number;
+  Name: string;
+  Description: string;
+  Image: string;
+  Price: number;
+  Status: string;
+}
+
+const ProductPage: React.FC = () => {
+  const { id } = useParams();
+  console.log(id)
+
+  const [data, setData] = useState<ProductData | null>(null);
+
+  useEffect(() => {
+    // Выполняем запрос при монтировании компонента
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`/api/consultations/${id}`);
+      if (!response.ok) {
+        throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      setData(testData.consultation[parseInt(id || '0', 10) - 1])
+      console.error('ошибка при выполннении запроса:', error);
+    }
+  };
+  console.log(data);
+
+  if (!data) {
+    return (
+      <Loader />
+    );
   }
 
-  const ProductPage: React.FC = () => {
-    const { id } = useParams();
-    console.log(id)
-
-    const [data, setData] = useState<ProductData | null>(null);
-
-    useEffect(() => {
-      // Выполняем запрос при монтировании компонента
-      fetchData();
-    }, []);
-  
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/consultations/${id}`);
-        if (!response.ok) {
-          throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
-        }
-  
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        setData(testData.consultation[parseInt(id || '0', 10)-1])
-        console.error('ошибка при выполннении запроса:', error);
-      }
-    };
-    console.log(data);
-
-    if (!data) {
-      return (
-        <Loader/>
-      );
-    }
-
-    return (
+  return (
+    <div>
+      <Navbar />
+      <div className="container">
         <div>
-            <Navbar />
-            <div className="container">
-            <Breadcrumb>
-                    <Breadcrumb.Item href="/">Главная</Breadcrumb.Item>
-                    <Breadcrumb.Item href="#" active>
-                        {data?.Name}
-                    </Breadcrumb.Item>
-                </Breadcrumb>
-            <Container style={{marginTop: '10%'}}>
-                <Row>
-                    <Col xs={12} md={6}>
-                        <img src={data?.Image} className="card-img-selected" alt={data?.Name}  style={{ borderRadius: '10px' }} />
-                    </Col>
-                    <Col xs={12} md={6}>
-                    <h1 className="text card-name-selected" style={{fontSize: '150%',fontWeight: 'bold' }}>{data?.Name}</h1>
-                        <p className="text card-description-selected">{data?.Description}</p>
-                        <div className="bottom-part">
-                            <p className="text card-price-selected">{data?.Price} рублей</p>
-                            <Button variant="primary">Провести</Button>
-                        </div>
-                    </Col>
-                </Row>
-            </Container>
-            </div>
+          <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+          <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+            / {data?.Name}
+          </Link>
         </div>
-    )
+        <Container style={{ marginTop: '10%' }}>
+          <Row>
+            <Col xs={12} md={6}>
+              <img src={data?.Image} className="card-img-selected" alt={data?.Name} style={{ borderRadius: '10px' }} />
+            </Col>
+            <Col xs={12} md={6}>
+              <h1 className="text card-name-selected" style={{ fontSize: '150%', fontWeight: 'bold' }}>{data?.Name}</h1>
+              <p className="text card-description-selected">{data?.Description}</p>
+              <div className="bottom-part">
+                <p className="text card-price-selected">{data?.Price} рублей</p>
+                <Button variant="primary">Провести</Button>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </div>
+  )
 }
 
 export default ProductPage;
