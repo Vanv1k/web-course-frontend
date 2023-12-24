@@ -8,16 +8,21 @@ interface EditConsModalProps {
     handleClose: () => void;
     consultationId: number;
     fetchData: () => void;
+    consName : string;
+    consDesc : string;
+    consPrice : string;
 }
 
-const EditConsModal: React.FC<EditConsModalProps> = ({ show, handleClose, consultationId, fetchData }) => {
-    const [name, setName] = useState("")
-    const [desc, setDesc] = useState("");
-    const [price, setPrice] = useState("");
+const EditConsModal: React.FC<EditConsModalProps> = ({ show, handleClose, consultationId, fetchData, consName, consDesc, consPrice }) => {
+    const [name, setName] = useState(consName)
+    const [desc, setDesc] = useState(consDesc);
+    const [price, setPrice] = useState(consPrice);
     const [img, setImg] = useState<File | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-
+    console.log(consName)
+    console.log(consDesc)
+    console.log(consPrice)
+    console.log(consultationId)
     const handleEdit = async (name: string, desc: string, price: string, img: File | null) => {
         const parsedPrice = parseInt(price);
         try {

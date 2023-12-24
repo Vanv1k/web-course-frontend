@@ -69,7 +69,6 @@ const ProductPage: React.FC = () => {
               <p className="text card-description-selected">{data?.Description}</p>
               <div className="bottom-part">
                 <p className="text card-price-selected">{data?.Price} рублей</p>
-                <Button variant="primary">Провести</Button>
               </div>
             </Col>
           </Row>

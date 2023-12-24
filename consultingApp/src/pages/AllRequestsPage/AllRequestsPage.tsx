@@ -76,7 +76,7 @@ const AllRequestsPage = () => {
           / Заявки
         </Link>
       </div>
-      <div style={{ margin: '10% 10% 0 10%' }}>
+      <div style={{ margin: '2% 10% 0 10%' }}>
         <Table striped bordered hover>
           <thead>
             {/* <tr>

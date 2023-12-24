@@ -34,6 +34,9 @@ const TableMainPage: React.FC = () => {
     const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     const [selectedConsultationId, setSelectedConsultationId] = useState(0);
+    const [selectedConsultationName, setSelectedConsultationName] = useState('')
+    const [selectedConsultationDesc, setSelectedConsultationDesc] = useState('')
+    const [selectedConsultationPrice, setSelectedConsultationPrice] = useState('')
     const [showEditModal, setShowEditModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const fetchData = async () => {
@@ -59,9 +62,12 @@ const TableMainPage: React.FC = () => {
         }
     };
 
-    const handleEdit = (consultationId: number) => {
-        setShowEditModal(true);
+    const handleEdit = (consultationId: number, name: string, desc: string, price: number) => {
         setSelectedConsultationId(consultationId)
+        setSelectedConsultationName(name)
+        setSelectedConsultationDesc(desc)
+        setSelectedConsultationPrice(price.toString())
+        setShowEditModal(true);
         fetchData()
     }
 
@@ -101,7 +107,13 @@ const TableMainPage: React.FC = () => {
             const role = roleString ? parseInt(roleString) : 0;
             dispatch(setRole(role))
         }
-    }, [dispatch, maxPriceFilter]);
+        if (!showEditModal) {
+            setSelectedConsultationId(0);
+            setSelectedConsultationName('');
+            setSelectedConsultationDesc('');
+            setSelectedConsultationPrice('');
+        }
+    }, [dispatch, maxPriceFilter, showEditModal]);
 
     return (
         <div>
@@ -147,7 +159,7 @@ const TableMainPage: React.FC = () => {
                                             <td key={index}>{value as React.ReactNode}</td>;
                                     }
                                     )}
-                                    <td><Button variant="primary" onClick={() => { handleEdit(item.Id) }}>
+                                    <td><Button variant="primary" onClick={() => { handleEdit(item.Id, item.Name, item.Description, item.Price) }}>
                                         Редактировать
                                     </Button></td>
                                     <td><Button variant="danger" onClick={() => { handleDelete(item.Id) }}>
@@ -160,7 +172,12 @@ const TableMainPage: React.FC = () => {
                     <Button className='add-cons' onClick={handleAdd}>
                         <img src={addImg} />
                     </Button>
-                    <EditConsModal show={showEditModal} handleClose={() => setShowEditModal(false)} consultationId={selectedConsultationId} fetchData={fetchData} />
+                   { selectedConsultationId > 0 ? <EditConsModal show={showEditModal} handleClose={() => setShowEditModal(false)} consultationId={selectedConsultationId}
+                        fetchData={fetchData}
+                        consName={selectedConsultationName}
+                        consDesc={selectedConsultationDesc}
+                        consPrice={selectedConsultationPrice} />
+                                : null}
                     <CreateConsModal show={showCreateModal} handleClose={() => setShowCreateModal(false)} fetchData={fetchData} />
                 </div>}
         </div>
