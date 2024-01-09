@@ -5,6 +5,7 @@ import { RootState } from '../../redux/store';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Loader from '../../widgets/Loader/Loader';
 import { Table, Button, Form } from 'react-bootstrap';
+import { statusDictionary } from '../../status/status';
 import { Link } from 'react-router-dom';
 import axios from 'axios'
 import './styles.css'
@@ -28,7 +29,15 @@ const AllRequestsAdminPage = () => {
     const endDate = useSelector((state: RootState) => state.requestFilters.endDate);
     const status = useSelector((state: RootState) => state.requestFilters.status);
     const user = useSelector((state: RootState) => state.requestFilters.user);
+    const [localUser, setLocalUser] = useState(user);
     const [requests, setRequests] = useState<Request[] | null>(null);
+
+
+    useEffect(()=> {
+        setLocalUser(user)
+        console.log(localUser)
+    },[user])
+
 
     const formattedTime = (timestamp: string) => {
         if (timestamp.includes('0001-01-01')) {
@@ -47,7 +56,7 @@ const AllRequestsAdminPage = () => {
         return formattedDate
     };
 
-    const fetchData = async (startDate: string, endDate: string, status: string, user: string) => {
+    const fetchData = async (startDate: string, endDate: string, status: string) => {
         try {
             const url = `/api/requests/?startDate=${startDate}&endDate=${endDate}&status=${status}`;
             let response
@@ -67,10 +76,16 @@ const AllRequestsAdminPage = () => {
 
 
             let result = await response.json();
-            if (user) {
-                result = result.filter((item: Request) => item.UserName.includes(user));
+            console.log(result)
+            console.log(user)
+            console.log(localUser)
+            let filteredResult = result
+            if (localUser != '') {
+                console.log('zxzzxxz')
+                filteredResult = result?.filter((item: Request) => item.UserName.includes(localUser)) || result
             }
-            setRequests(result);
+            console.log(filteredResult)
+            setRequests(filteredResult);
         } catch (error) {
             console.error('ошибка при выполнении запроса:', error);
         }
@@ -89,7 +104,10 @@ const AllRequestsAdminPage = () => {
     };
 
     const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalUser(e.target.value)
         dispatch(setUserFilter(e.target.value));
+        // const previos = requests
+        // setRequests(requests?.filter((item: Request) => item.UserName.includes(user)) || previos);
     };
 
 
@@ -106,7 +124,7 @@ const AllRequestsAdminPage = () => {
                     },
                 }
             );
-            fetchData(startDate, endDate, status, user)
+            fetchData(startDate, endDate, status)
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -117,26 +135,42 @@ const AllRequestsAdminPage = () => {
         dispatch(setEndDateFilter(''));
         dispatch(setStatusFilter(''));
         dispatch(setUserFilter(''));
-        fetchData(startDate, endDate, status, user)
+        setLocalUser('')
+        fetchData(startDate, endDate, status)
     }
 
     const fetchDataWithPolling = async () => {
         try {
-            fetchData(startDate, endDate, status, user);
+            fetchData(startDate, endDate, status);
         } catch (error) {
             console.error('Error fetching data with polling:', error);
         }
     };
 
+
+
+    useEffect(()=> {
+        fetchData(startDate, endDate, status);
+    }, [startDate, endDate, status])
+
     useEffect(() => {
-        fetchData(startDate, endDate, status, user);
+        if (localUser != "") {
+            const previos = requests
+            setRequests(requests?.filter((item: Request) => item.UserName.includes(localUser)) || previos);
+        }
+    }, [localUser])
+
+    useEffect(() => {
         const pollingInterval = setInterval(() => {
             fetchDataWithPolling();
-        }, 5000);
-        console.log('получил данные')
+        }, 2000);
         return () => clearInterval(pollingInterval);
 
-    }, [dispatch, startDate, endDate, status, user]);
+    }, [startDate, endDate, status, localUser]);
+
+    if (!requests) {
+        return <div><Navbar /> <Loader /></div>
+    }
 
     return (
         <div>
@@ -191,7 +225,7 @@ const AllRequestsAdminPage = () => {
                         Сбросить фильтры
                     </Button>
                 </div>
-                {(!requests || requests.length === 0) ? <Loader /> :
+                {(requests?.length == 0) ? <h1 className='small-h1' style={{ marginTop: '5%' }}>Нет данных, которые соответствуют фильтрам</h1> :
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -214,6 +248,7 @@ const AllRequestsAdminPage = () => {
                                     {Object.values(request).map((value, index) => {
                                         const excludedIndices = [0, 2];
                                         const timeRows = [3, 4, 8]
+                                        if (index === 1) return <td key={index}>{statusDictionary[value as keyof typeof statusDictionary] as React.ReactNode}</td>
                                         return excludedIndices.includes(index) ? null :
                                             timeRows.includes(index) ? <td key={index}>{formattedTime(value as string) as React.ReactNode}</td> :
                                                 <td key={index}>{value as React.ReactNode}</td>;

@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react'
 import { ChangeEvent } from 'react';
 import testData from '../../data';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveRequestID, setMaxPriceFilter, setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
 import { loginSuccess, loginFailure, setRole } from '../../redux/auth/authSlice';
@@ -34,27 +34,25 @@ const MainPage: React.FC = () => {
     const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
     const activeRequest = useSelector((state: RootState) => state.filterAndActiveId.activeRequestID);
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+    const role = useSelector((state: RootState) => state.auth.role);
+
     const fetchData = async () => {
         console.log(maxPriceFilter)
         try {
             const url = maxPriceFilter ? `/api/consultations/?maxPrice=${maxPriceFilter}` : '/api/consultations/';
             let response
-            if (!localStorage.getItem("accessToken")) {
-                response = await fetch(url);
-            } else {
-                response = await fetch(url, {
+if (!localStorage.getItem("accessToken")) {
+                response = await axios.get(url)
+            }
+            else {
+                response = await axios.get(url, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                     },
                 });
-
-            }
-            if (!response.ok) {
-                throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
             }
 
-
-            const result = await response.json();
+            const result = await response?.data;
             localStorage.setItem("ActiveRequestId", result?.ActiveRequestId?.toString() || '');
             dispatch(setActiveRequestID(result?.ActiveRequestId));
             console.log(result);
@@ -82,6 +80,7 @@ const MainPage: React.FC = () => {
     }
 
     useEffect(() => {
+        console.log('MainPage useEffect is triggered');
         fetchData()
         if (window.localStorage.getItem("accessToken")) {
             dispatch(loginSuccess())
@@ -107,6 +106,7 @@ const MainPage: React.FC = () => {
                 <Link to="/" style={{ textDecoration: 'none', color: 'grey' }}>
                     <p>Главная</p>
                 </Link>
+                {role > 0 ?  <Link to="/main-page/admin">Сменить режим просмотра</Link> : null}
                 <Form
                     className="d-flex"
                     id="search"
@@ -140,7 +140,7 @@ const MainPage: React.FC = () => {
                         </div>
                         {isAuthenticated ?
                             (activeRequest && numOfCons > 0) ?
-                                <Link className='cart' to='/shopping-cart'>
+                                <Link className='cart' to={`/request/${activeRequest}`}>
                                     <img src={CartImg} />
                                 </Link> :
                                 <Link className='cart empty' to='/shopping-cart' >

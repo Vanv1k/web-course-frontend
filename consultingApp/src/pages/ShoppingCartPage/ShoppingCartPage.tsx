@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Table from 'react-bootstrap/Table';
 import CartItem from '../../widgets/CardItem/CartItem';
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form, FormLabel } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../widgets/Loader/Loader';
 import { RootState } from '../../redux/store';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setNumOfProdInReq } from '../../redux/filterAndActiveRequestID/actions';
+import { setNumOfProdInReq, setActiveRequestID } from '../../redux/filterAndActiveRequestID/actions';
+import { loginSuccess, loginFailure, setRole } from '../../redux/auth/authSlice';
 import axios from 'axios';
 
 interface CartItem {
@@ -19,29 +20,67 @@ interface CartItem {
 
 const ShoppingCartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [showModal, setShowModal] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [consultationTime, setConsultationTime] = useState("");
   const [consultationPlace, setConsultationPlace] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const ActiveRequestId = useSelector((state: RootState) => state.filterAndActiveId.activeRequestID);
   const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const checkRequestId = async () => {
+    if (window.localStorage.getItem("ActiveRequestId")) {
+      const idstr = window.localStorage.getItem("ActiveRequestId");
+      const id = idstr ? parseInt(idstr) : 0;
+      console.log(id)
+      await dispatch(setActiveRequestID(id));
+    }
+  }
+
+  const fetchDataAndCheckRequestId = async () => {
+    await checkRequestId();
     fetchData();
-  }, []);
+  };
+
+  useEffect(() => {
+    console.log('Cart useEffect is triggered');
+    const initializePage = async () => {
+      await fetchDataAndCheckRequestId();
+    };
+
+    initializePage();
+
+    if (window.localStorage.getItem("accessToken")) {
+      dispatch(loginSuccess())
+    }
+    if (window.localStorage.getItem("role")) {
+      const roleString = window.localStorage.getItem("role");
+      const role = roleString ? parseInt(roleString) : 0;
+      dispatch(setRole(role))
+    }
+    const currentNumOfCons = localStorage.getItem('numOfCons');
+    const currentNum = currentNumOfCons ? parseInt(currentNumOfCons, 10) : 0;
+    const updatedNumOfCons = currentNum;
+    localStorage.setItem('numOfCons', updatedNumOfCons.toString());
+    if (updatedNumOfCons != numOfCons) {
+      dispatch(setNumOfProdInReq(updatedNumOfCons));
+    }
+  }, [ActiveRequestId, numOfCons]);
 
   const fetchData = async () => {
-    try {
-      const response = await axios.get('/api/consultations/request', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      setCartItems(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    if (ActiveRequestId != null) {
+      try {
+        console.log('дурак здесь выполняет')
+        const response = await axios.get(`/api/consultations/request/${ActiveRequestId.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        setCartItems(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     }
   };
 
@@ -60,7 +99,9 @@ const ShoppingCartPage: React.FC = () => {
       if (updatedNumOfCons != numOfCons) {
         dispatch(setNumOfProdInReq(updatedNumOfCons));
       }
-      fetchData();
+      if (numOfCons == 0) {
+        navigate('/')
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -82,13 +123,6 @@ const ShoppingCartPage: React.FC = () => {
     }
   }
 
-  const handleSend = () => {
-    setShowModal(true);
-  };
-
-  const handleModalClose = () => {
-    setShowModal(false);
-  };
 
   const handleFormRequest = async (companyName: string, consultationPlace: string, consultationTime: string) => {
     const currentTime = new Date();
@@ -128,7 +162,6 @@ const ShoppingCartPage: React.FC = () => {
             },
           }
         );
-        setShowModal(false);
         dispatch(setNumOfProdInReq(0));
         const updatedNumOfCons = 0;
         localStorage.setItem('numOfCons', updatedNumOfCons.toString());
@@ -144,15 +177,29 @@ const ShoppingCartPage: React.FC = () => {
     }
   }
 
-  const renderAdditionalFields = () => {
+  const renderCart = () => {
     return (
-      <Modal show={showModal} onHide={handleModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Формирование заявки</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            {/* Добавьте дополнительные поля ввода здесь */}
+      <>
+        <h2>Корзина</h2>
+        <div style={{display: 'flex'}}>
+          <Table striped bordered hover style={{width: 'fit-content'}}>
+            <thead >
+              <tr style={{height: '50px'}}>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.map((item) => (
+                <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} />
+              ))}
+            </tbody>
+          </Table>
+
+
+          <Form style={{ width: '30%', marginLeft:'5%' }}>
+            <FormLabel className='small-h1'>Заполните форму для отправки заявки</FormLabel>
             <Form.Group className="mb-3" controlId="formAdditionalField1">
               <Form.Label>Название компании</Form.Label>
               <Form.Control
@@ -185,46 +232,16 @@ const ShoppingCartPage: React.FC = () => {
                 onChange={(e) => setConsultationTime(e.target.value)}
               />
             </Form.Group>
-          </Form>
-          {error && <div className="error-message">{error}</div>}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>
-            Закрыть
-          </Button>
-          <Button variant="primary" onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
+            {error && <div className="error-message">{error}</div>}
+            <Button variant="primary" style={{width: '100%'}} onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
             Отправить
           </Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  };
+          </Form>
+        </div>
+        <Button  variant="danger" onClick={handleDeleteCart}>
+            Очистить корзину
+          </Button>
 
-  const renderCart = () => {
-    return (
-      <>
-        <h2>Корзина</h2>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Цена</th>
-              <th>Действие</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cartItems.map((item) => (
-              <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} />
-            ))}
-          </tbody>
-        </Table>
-        <Button variant="primary" onClick={handleSend}>
-          Отправить
-        </Button>
-        <Button style={{ marginLeft: '80%' }} variant="danger" onClick={handleDeleteCart}>
-          Очистить корзину
-        </Button>
-        {renderAdditionalFields()}
       </>
     );
   };
@@ -242,15 +259,16 @@ const ShoppingCartPage: React.FC = () => {
 
   return (
     <div>
-      {cartItems?.length > 0 ? <> <Navbar />         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+      <Navbar />         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
         <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
         <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
           / Корзина
         </Link>
-      </div> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
-          {renderCart()}
-        </div> </> : <> {renderLoading()}
-        <h2 style={{ marginTop: "-20%", marginLeft: "5%" }}>Корзина пуста</h2></>}
+      </div>
+      {cartItems?.length > 0 ? <> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
+        {renderCart()}
+      </div> </> : <>
+        <h2 style={{ marginTop: "10%", marginLeft: "5%" }}>Корзина пуста</h2></>}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { RootState } from '../../redux/store';
 import Navbar from '../../widgets/Navbar/Navbar';
 import Loader from '../../widgets/Loader/Loader';
 import { Link } from 'react-router-dom';
+import { statusDictionary } from '../../status/status';
 import { loginSuccess, setRole } from '../../redux/auth/authSlice';
 import Table from 'react-bootstrap/Table';
 
@@ -99,6 +100,7 @@ const AllRequestsPage = () => {
                 {Object.values(request).map((value, index) => {
                   const excludedIndices = [0, 2, 5, 6];
                   const timeRows = [3, 4, 8]
+                  if (index===1) return <td key={index}>{statusDictionary[value as keyof typeof statusDictionary] as React.ReactNode}</td>
                   return excludedIndices.includes(index) ? null :
                     timeRows.includes(index) ? <td key={index}>{formattedTime(value as string) as React.ReactNode}</td> :
                       <td key={index}>{value as React.ReactNode}</td>;

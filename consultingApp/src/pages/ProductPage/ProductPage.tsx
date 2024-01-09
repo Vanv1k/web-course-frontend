@@ -1,5 +1,5 @@
 import Navbar from '../../widgets/Navbar/Navbar';
-import Button from 'react-bootstrap/Button';
+import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
@@ -18,30 +18,26 @@ interface ProductData {
 
 const ProductPage: React.FC = () => {
   const { id } = useParams();
-  console.log(id)
+  let i = 0;
 
   const [data, setData] = useState<ProductData | null>(null);
 
   useEffect(() => {
-    // Выполняем запрос при монтировании компонента
+    console.log('ProductPage useEffect is triggered');
     fetchData();
-  }, []);
+  }, [id]);
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`/api/consultations/${id}`);
-      if (!response.ok) {
-        throw new Error(`Ошибка при выполнении запроса: ${response.statusText}`);
-      }
+      const response = await axios.get(`/api/consultations/${id}`);
 
-      const result = await response.json();
+      const result = await response?.data;
       setData(result);
     } catch (error) {
       setData(testData.consultation[parseInt(id || '0', 10) - 1])
       console.error('ошибка при выполннении запроса:', error);
     }
   };
-  console.log(data);
 
   if (!data) {
     return (
