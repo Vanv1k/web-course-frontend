@@ -3,7 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import { Navbar as NavB } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { logout } from '../../redux/auth/authActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveRequestID, setMaxPriceFilter } from '../../redux/filterAndActiveRequestID/actions';
@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
 
 
@@ -20,10 +21,10 @@ const Navbar = () => {
 
     try {
       await dispatch(logout());
-      window.location.reload();
     } catch (error) {
       console.error("Error during logout:", error);
     }
+    navigate("/")
   };
 
   return (

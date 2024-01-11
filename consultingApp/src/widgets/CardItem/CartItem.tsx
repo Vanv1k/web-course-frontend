@@ -8,9 +8,10 @@ interface CartItemProps {
     Price: number;
   };
   onRemove: (removedItem: { Name: string; Price: number }) => void;
+  requestStatus: string;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
+const CartItem: React.FC<CartItemProps> = ({ item, onRemove, requestStatus }) => {
   const handleRemove = () => {
     onRemove(item);
   };
@@ -19,11 +20,12 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
     <tr>
       <td>{item.Name}</td>
       <td>{item.Price}</td>
+      {requestStatus == 'active' ? 
       <td>
         <Button variant="danger" onClick={handleRemove}>
           Удалить
         </Button>
-      </td>
+      </td> : <> </>}
     </tr>
   );
 };

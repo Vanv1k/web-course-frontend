@@ -239,6 +239,7 @@ const AllRequestsAdminPage = () => {
                                 <th key={'companyName'}>Компания</th>
                                 <th key={'end'}>Закончить</th>
                                 <th key={'decline'}>Отменить</th>
+                                <th key={'more'}>Подробнее</th>
                                 {/* 1 3 4 7 8 9  0 2 5 6 */}
                             </tr>
                         </thead>
@@ -257,6 +258,7 @@ const AllRequestsAdminPage = () => {
                                         <>
                                             <td>Заявка закончена</td>
                                             <td>Заявка закончена</td>
+                                            <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
                                         </> :
                                         <>
                                             <td><Button variant="primary" onClick={() => { handleChangeStatus(request.Id, 'ended') }}>
@@ -265,6 +267,8 @@ const AllRequestsAdminPage = () => {
                                             <td><Button variant="danger" onClick={() => { handleChangeStatus(request.Id, 'canceled') }}>
                                                 Отменить
                                             </Button></td>
+                                            <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
+                                            
                                         </>}
                                 </tr>
                             ))}

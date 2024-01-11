@@ -3,7 +3,7 @@ import Navbar from '../../widgets/Navbar/Navbar';
 import Table from 'react-bootstrap/Table';
 import CartItem from '../../widgets/CardItem/CartItem';
 import { Button, Modal, Form, FormLabel } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../widgets/Loader/Loader';
 import { RootState } from '../../redux/store';
 import { Link } from 'react-router-dom';
@@ -18,8 +18,16 @@ interface CartItem {
   Price: number;
 }
 
+interface Cart {
+  Status: string;
+  ConsultationInf: CartItem[];
+}
+
 const ShoppingCartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<Cart>({
+    Status: "",
+    ConsultationInf: [],
+  });
   const [companyName, setCompanyName] = useState("");
   const [consultationTime, setConsultationTime] = useState("");
   const [consultationPlace, setConsultationPlace] = useState("");
@@ -28,6 +36,8 @@ const ShoppingCartPage: React.FC = () => {
   const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { id } = useParams();  
 
   const checkRequestId = async () => {
     if (window.localStorage.getItem("ActiveRequestId")) {
@@ -69,15 +79,16 @@ const ShoppingCartPage: React.FC = () => {
   }, [ActiveRequestId, numOfCons]);
 
   const fetchData = async () => {
+   
     if (ActiveRequestId != null) {
       try {
-        console.log('дурак здесь выполняет')
-        const response = await axios.get(`/api/consultations/request/${ActiveRequestId.toString()}`, {
+        const response = await axios.get(`/api/consultations/request/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
         setCartItems(response.data);
+        console.log(cartItems)
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -176,28 +187,31 @@ const ShoppingCartPage: React.FC = () => {
       console.error('Error fetching data:', error);
     }
   }
+  console.log(id)
 
   const renderCart = () => {
     return (
       <>
-        <h2>Корзина</h2>
+      {cartItems.Status == 'active' ?  
+        <h2>Корзина</h2> : <h2>Информация о заявке</h2>}
         <div style={{display: 'flex'}}>
           <Table striped bordered hover style={{width: 'fit-content'}}>
             <thead >
               <tr style={{height: '50px'}}>
                 <th>Название</th>
                 <th>Цена</th>
-                <th>Действие</th>
+                {cartItems.Status == 'active' ? 
+                <th>Действие</th> : <></>}
               </tr>
             </thead>
             <tbody>
-              {cartItems.map((item) => (
-                <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} />
+              {cartItems.ConsultationInf.map((item) => (
+                <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} requestStatus={cartItems.Status}/>
               ))}
             </tbody>
           </Table>
 
-
+                {cartItems.Status == 'active' ? 
           <Form style={{ width: '30%', marginLeft:'5%' }}>
             <FormLabel className='small-h1'>Заполните форму для отправки заявки</FormLabel>
             <Form.Group className="mb-3" controlId="formAdditionalField1">
@@ -236,21 +250,29 @@ const ShoppingCartPage: React.FC = () => {
             <Button variant="primary" style={{width: '100%'}} onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
             Отправить
           </Button>
-          </Form>
+          </Form> : <></>}
         </div>
+        {cartItems.Status == 'active' ? 
         <Button  variant="danger" onClick={handleDeleteCart}>
             Очистить корзину
-          </Button>
+          </Button> : <> </>}
 
       </>
     );
   };
 
-  const renderLoading = () => {
+  if (!cartItems.ConsultationInf) {
     return (
       <>
         <Navbar />
-        <Loader />
+        <div style={{ marginLeft: "5%", marginTop: "1%" }}>
+        <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+       
+        <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+          / Корзина
+        </Link>
+      </div>
+        <h2 style={{ marginTop: "10%", marginLeft: "5%" }}>Корзина пуста</h2>
       </>
     );
   };
@@ -261,14 +283,16 @@ const ShoppingCartPage: React.FC = () => {
     <div>
       <Navbar />         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
         <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+        {cartItems.Status != 'active' ? 
+        <Link to="/requests"style={{ textDecoration: 'none' }}> / Таблица заявок </Link> : <></>}
         <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
           / Корзина
-        </Link>
+        </Link> 
       </div>
-      {cartItems?.length > 0 ? <> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
+      {cartItems.ConsultationInf?.length > 0 ? <> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
         {renderCart()}
-      </div> </> : <>
-        <h2 style={{ marginTop: "10%", marginLeft: "5%" }}>Корзина пуста</h2></>}
+      </div> </> : 
+        <Loader/>}
     </div>
   );
 };

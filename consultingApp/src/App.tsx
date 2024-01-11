@@ -26,7 +26,7 @@ const App = () => {
         {role > 0 ?
           <Route path="/requests" element={<AllRequestsAdminPage />} />
           : <Route path="/requests" element={<AllRequestsPage />} />}
-         <Route path="/request/:ActiveRequestId" element={<ShoppingCartPage />} />
+         <Route path="/request/:id" element={<ShoppingCartPage />} />
          <Route path="/consultations/create" element={<CreatePage />} />
          <Route path="/consultations/:consultationId/edit" element={<EditPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
