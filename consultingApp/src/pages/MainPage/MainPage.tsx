@@ -29,6 +29,7 @@ interface Data {
 }
 const MainPage: React.FC = () => {
     const [data, setData] = useState<Data | null>({ id: 0, consultation: [] });
+    const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
     const numOfCons = useSelector((state: RootState) => state.filterAndActiveId.numOfCons);
     const maxPriceFilter = useSelector((state: RootState) => state.filterAndActiveId.maxPriceFilter);
@@ -37,11 +38,11 @@ const MainPage: React.FC = () => {
     const role = useSelector((state: RootState) => state.auth.role);
 
     const fetchData = async () => {
-        console.log(maxPriceFilter)
+        setLoading(true);
         try {
             const url = maxPriceFilter ? `/api/consultations/?maxPrice=${maxPriceFilter}` : '/api/consultations/';
             let response
-if (!localStorage.getItem("accessToken")) {
+            if (!localStorage.getItem("accessToken")) {
                 response = await axios.get(url)
             }
             else {
@@ -51,13 +52,14 @@ if (!localStorage.getItem("accessToken")) {
                     },
                 });
             }
-
+            setLoading(false);
             const result = await response?.data;
             localStorage.setItem("ActiveRequestId", result?.ActiveRequestId?.toString() || '');
             dispatch(setActiveRequestID(result?.ActiveRequestId));
             console.log(result);
             setData(result);
         } catch (error) {
+            setLoading(false);
             console.log(testData)
             let result = { ...testData };
             if (maxPriceFilter) {
@@ -69,8 +71,14 @@ if (!localStorage.getItem("accessToken")) {
     };
 
     const handleMaxPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const maxPriceString = e.target.value !== '' ? parseInt(e.target.value).toString() : '';
-        dispatch(setMaxPriceFilter(maxPriceString));
+        const inputValue = e.target.value;
+
+        const isValidNumber = /^\d*$/.test(inputValue);
+      
+        if (isValidNumber || inputValue === '') {
+          const maxPriceString = inputValue !== '' ? parseInt(inputValue).toString() : '';
+          dispatch(setMaxPriceFilter(maxPriceString));
+        }
     };
 
     const buttonAddClicked = () => {
@@ -99,6 +107,36 @@ if (!localStorage.getItem("accessToken")) {
         }
     }, [dispatch, maxPriceFilter]);
 
+
+    if (loading) {
+        return (
+            <div>
+                <Navbar />
+                <div className="container">
+                    <Link to="/" style={{ textDecoration: 'none', color: 'grey' }}>
+                        <p>Главная</p>
+                    </Link>
+                    {role > 0 ? <Link to="/main-page/admin">Сменить режим просмотра</Link> : null}
+                    <Form
+                        className="d-flex"
+                        id="search"
+                        style={{ width: "20%", minWidth: "250px", marginTop: "0.7%" }}
+                    >
+                        <Form.Control
+                            type="search"
+                            placeholder="Поиск по максимальной цене"
+                            className="me-2"
+                            aria-label="Search"
+                            value={maxPriceFilter}
+                            onChange={handleMaxPriceChange}
+                        />
+                    </Form>
+                </div>
+                <Loader/>
+            </div>
+        );
+    }
+
     return (
         <div>
             <Navbar />
@@ -106,7 +144,7 @@ if (!localStorage.getItem("accessToken")) {
                 <Link to="/" style={{ textDecoration: 'none', color: 'grey' }}>
                     <p>Главная</p>
                 </Link>
-                {role > 0 ?  <Link to="/main-page/admin">Сменить режим просмотра</Link> : null}
+                {role > 0 ? <Link to="/main-page/admin">Сменить режим просмотра</Link> : null}
                 <Form
                     className="d-flex"
                     id="search"
@@ -121,8 +159,8 @@ if (!localStorage.getItem("accessToken")) {
                         onChange={handleMaxPriceChange}
                     />
                 </Form>
-                {!data || data?.consultation.length === 0 ?
-                    <Loader />
+                {data?.consultation.length === 0 ?
+                    <h2 style={{marginTop: "10%"}}>Нет данных</h2>
                     : <>
                         <div className="row">
                             {data?.consultation?.map((item) => (
@@ -151,7 +189,6 @@ if (!localStorage.getItem("accessToken")) {
             </div>
         </div>
     )
-
 }
 
 export default MainPage 

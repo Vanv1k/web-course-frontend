@@ -1,7 +1,39 @@
-.filter {
-    margin-left: 1%;
-}
-
-.filter-button {
-    margin-left: 35%;
-}
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1%;
+  }
+  
+  .filter {
+    margin-bottom: 10px;
+  }
+  
+  .options {
+    margin-bottom: 10px;
+  }
+  
+  .filter-button {
+    margin-top: 5px;
+  }
+  
+  @media (max-width: 768px) {
+    .filter-container {
+      flex-direction: column;
+    }
+  
+    .filter,
+    .options,
+    .filter-button {
+      width: 100%; 
+    }
+  
+    .filter {
+      margin-bottom: 5px;
+    }
+  
+    .options {
+      margin-bottom: 10px;
+    }
+  }

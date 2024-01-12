@@ -125,7 +125,7 @@ console.log(name, desc, price)
         <div>
             <Navbar />
             <div style={{ marginLeft: "5%", marginTop: "1%" }}>
-                <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+                <Link to="/main-page/admin" style={{ textDecoration: 'none' }}>Главная </Link>
                 <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
                     / Редактирование консультации
                 </Link>

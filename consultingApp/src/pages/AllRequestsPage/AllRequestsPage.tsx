@@ -77,7 +77,8 @@ const AllRequestsPage = () => {
           / Заявки
         </Link>
       </div>
-      <div style={{ margin: '2% 10% 0 10%' }}>
+      <div style={{ margin: '2% 6% 0 6%' }}>
+      <div className='table-responsive'>
         <Table striped bordered hover>
           <thead>
             {/* <tr>
@@ -91,6 +92,7 @@ const AllRequestsPage = () => {
               <th key={'consPlace'}>Место консультации</th>
               <th key={'consTime'}>Время консультации</th>
               <th key={'companyName'}>Компания</th>
+              <th key={'more'}>Подробнее</th>
               {/* 1 3 4 7 8 9  0 2 5 6 */}
             </tr>
           </thead>
@@ -105,10 +107,12 @@ const AllRequestsPage = () => {
                     timeRows.includes(index) ? <td key={index}>{formattedTime(value as string) as React.ReactNode}</td> :
                       <td key={index}>{value as React.ReactNode}</td>;
                 })}
+                <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
               </tr>
             ))}
           </tbody>
         </Table>
+        </div>
       </div>
     </div>
   );

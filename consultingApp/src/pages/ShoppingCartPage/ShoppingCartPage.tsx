@@ -10,6 +10,9 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNumOfProdInReq, setActiveRequestID } from '../../redux/filterAndActiveRequestID/actions';
 import { loginSuccess, loginFailure, setRole } from '../../redux/auth/authSlice';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import moment from 'moment';
 import axios from 'axios';
 
 interface CartItem {
@@ -37,7 +40,7 @@ const ShoppingCartPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { id } = useParams();  
+  const { id } = useParams();
 
   const checkRequestId = async () => {
     if (window.localStorage.getItem("ActiveRequestId")) {
@@ -79,7 +82,7 @@ const ShoppingCartPage: React.FC = () => {
   }, [ActiveRequestId, numOfCons]);
 
   const fetchData = async () => {
-   
+
     if (ActiveRequestId != null) {
       try {
         const response = await axios.get(`/api/consultations/request/${id}`, {
@@ -192,68 +195,71 @@ const ShoppingCartPage: React.FC = () => {
   const renderCart = () => {
     return (
       <>
-      {cartItems.Status == 'active' ?  
-        <h2>Корзина</h2> : <h2>Информация о заявке</h2>}
-        <div style={{display: 'flex'}}>
-          <Table striped bordered hover style={{width: 'fit-content'}}>
+        {cartItems.Status == 'active' ?
+          <h2>Корзина</h2> : <h2>Информация о заявке</h2>}
+        <div style={{ display: 'flex' }}>
+          <Table striped bordered hover style={{ width: 'fit-content' }}>
             <thead >
-              <tr style={{height: '50px'}}>
+              <tr style={{ height: '50px' }}>
                 <th>Название</th>
                 <th>Цена</th>
-                {cartItems.Status == 'active' ? 
-                <th>Действие</th> : <></>}
+                {cartItems.Status == 'active' ?
+                  <th>Действие</th> : <></>}
               </tr>
             </thead>
             <tbody>
               {cartItems.ConsultationInf.map((item) => (
-                <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} requestStatus={cartItems.Status}/>
+                <CartItem key={item.Name} item={item} onRemove={() => removeFromCart(item)} requestStatus={cartItems.Status} />
               ))}
             </tbody>
           </Table>
 
-                {cartItems.Status == 'active' ? 
-          <Form style={{ width: '30%', marginLeft:'5%' }}>
-            <FormLabel className='small-h1'>Заполните форму для отправки заявки</FormLabel>
-            <Form.Group className="mb-3" controlId="formAdditionalField1">
-              <Form.Label>Название компании</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Название компании"
-                name="companyName"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-            </Form.Group>
+          {cartItems.Status == 'active' ?
+            <Form style={{ width: '30%', marginLeft: '5%' }}>
+              <FormLabel className='small-h1'>Заполните форму для отправки заявки</FormLabel>
+              <Form.Group className="mb-3" controlId="formAdditionalField1">
+                <Form.Label>Название компании</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Название компании"
+                  name="companyName"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+              </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formAdditionalField2">
-              <Form.Label>Место консультации</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Место проведения консультации"
-                name="consultationPlace"
-                value={consultationPlace}
-                onChange={(e) => setConsultationPlace(e.target.value)}
-              />
-            </Form.Group>
+              <Form.Group className="mb-3" controlId="formAdditionalField2">
+                <Form.Label>Место консультации</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Место проведения консультации"
+                  name="consultationPlace"
+                  value={consultationPlace}
+                  onChange={(e) => setConsultationPlace(e.target.value)}
+                />
+              </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formAdditionalField3">
-              <Form.Label>Время консультации</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Формат: 2023-12-31 18:30"
-                name="consultationTime"
-                value={consultationTime}
-                onChange={(e) => setConsultationTime(e.target.value)}
-              />
-            </Form.Group>
-            {error && <div className="error-message">{error}</div>}
-            <Button variant="primary" style={{width: '100%'}} onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
-            Отправить
-          </Button>
-          </Form> : <></>}
+              <Form.Group className="mb-3" controlId="formAdditionalField3">
+                <Form.Label style={{marginRight: '20%'}}>Время консультации</Form.Label>
+                <DatePicker 
+                  selected={consultationTime ? moment(consultationTime).toDate() : null}
+                  onChange={(date) => setConsultationTime(moment(date).format('YYYY-MM-DD HH:mm'))}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  timeCaption="Time"
+                  placeholderText="Выберите дату и время"
+                />
+              </Form.Group>
+              {error && <div className="error-message">{error}</div>}
+              <Button variant="primary" style={{ width: '100%' }} onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
+                Отправить
+              </Button>
+            </Form> : <></>}
         </div>
-        {cartItems.Status == 'active' ? 
-        <Button  variant="danger" onClick={handleDeleteCart}>
+        {cartItems.Status == 'active' ?
+          <Button variant="danger" onClick={handleDeleteCart}>
             Очистить корзину
           </Button> : <> </>}
 
@@ -266,12 +272,12 @@ const ShoppingCartPage: React.FC = () => {
       <>
         <Navbar />
         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
-       
-        <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
-          / Корзина
-        </Link>
-      </div>
+          <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+
+          <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+            / Корзина
+          </Link>
+        </div>
         <h2 style={{ marginTop: "10%", marginLeft: "5%" }}>Корзина пуста</h2>
       </>
     );
@@ -283,16 +289,21 @@ const ShoppingCartPage: React.FC = () => {
     <div>
       <Navbar />         <div style={{ marginLeft: "5%", marginTop: "1%" }}>
         <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
-        {cartItems.Status != 'active' ? 
-        <Link to="/requests"style={{ textDecoration: 'none' }}> / Таблица заявок </Link> : <></>}
-        <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
-          / Корзина
-        </Link> 
+        {cartItems.Status != 'active' ?
+          <>
+            <Link to="/requests" style={{ textDecoration: 'none' }}> / Заявки </Link>
+            <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+              / Информация о заявке
+            </Link>
+          </> :
+          <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
+            / Корзина
+          </Link>}
       </div>
       {cartItems.ConsultationInf?.length > 0 ? <> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
         {renderCart()}
-      </div> </> : 
-        <Loader/>}
+      </div> </> :
+        <Loader />}
     </div>
   );
 };

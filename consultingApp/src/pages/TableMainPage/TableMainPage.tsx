@@ -115,6 +115,7 @@ const TableMainPage: React.FC = () => {
             </div>
             {!data || data?.consultation.length === 0 ? <Loader />
                 : <div style={{ margin: '5% 10% 0 10%' }}>
+                    <div className='table-responsive'>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -136,7 +137,7 @@ const TableMainPage: React.FC = () => {
                                     }
                                     )}
                                     <td>
-                                        <Link to={`consultations/${item.Id}/edit`}>
+                                        <Link to={`/consultations/${item.Id}/edit`}>
                                         <Button variant="primary">
                                             Редактировать
                                         </Button>
@@ -149,6 +150,7 @@ const TableMainPage: React.FC = () => {
                             ))}
                         </tbody>
                     </Table>
+                    </div>
                     <Link className='add-cons' to={"/consultations/create"}>
                         <img src={addImg} />
                     </Link>

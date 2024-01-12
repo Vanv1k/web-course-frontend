@@ -33,10 +33,10 @@ const AllRequestsAdminPage = () => {
     const [requests, setRequests] = useState<Request[] | null>(null);
 
 
-    useEffect(()=> {
+    useEffect(() => {
         setLocalUser(user)
         console.log(localUser)
-    },[user])
+    }, [user])
 
 
     const formattedTime = (timestamp: string) => {
@@ -149,7 +149,7 @@ const AllRequestsAdminPage = () => {
 
 
 
-    useEffect(()=> {
+    useEffect(() => {
         fetchData(startDate, endDate, status);
     }, [startDate, endDate, status])
 
@@ -181,8 +181,8 @@ const AllRequestsAdminPage = () => {
                     / Заявки
                 </Link>
             </div>
-            <div style={{ margin: '3% 10% 0 10%' }}>
-                <div style={{ display: 'flex', marginBottom: '1%' }}>
+            <div style={{ margin: '3% 7% 0 7%' }}>
+                <div className='filter-container'>
                     <div className='filter'>
                         <label>Дата формирования (начало):</label>
                         <input type="date" value={startDate} onChange={handleStartDateChange} />
@@ -191,17 +191,17 @@ const AllRequestsAdminPage = () => {
                         <label>Дата формирования (конец):</label>
                         <input type="date" value={endDate} onChange={handleEndDateChange} />
                     </div>
-                    <div className='filter'>
+                    <div className='filter options'>
                         <select value={status} onChange={handleStatusChange}>
                             <option value="">Статус (все)</option>
                             <option key={"formed"} value={"formed"}>
-                                formed
+                                В работе
                             </option>
                             <option key={"ended"} value={"ended"}>
-                                ended
+                                Закончена
                             </option>
                             <option key={"canceled"} value={"canceled"}>
-                                canceled
+                                Отменена
                             </option>
                         </select>
                     </div>
@@ -226,54 +226,56 @@ const AllRequestsAdminPage = () => {
                     </Button>
                 </div>
                 {(requests?.length == 0) ? <h1 className='small-h1' style={{ marginTop: '5%' }}>Нет данных, которые соответствуют фильтрам</h1> :
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th key={'status'}>Статус</th>
-                                <th key={'formDate'}>Сформирована</th>
-                                <th key={'endDate'}>Закончена</th>
-                                <th key={'userName'}>Имя отправителя</th>
-                                <th key={'moderatorName'}>Имя модератора</th>
-                                <th key={'consPlace'}>Место консультации</th>
-                                <th key={'consTime'}>Время консультации</th>
-                                <th key={'companyName'}>Компания</th>
-                                <th key={'end'}>Закончить</th>
-                                <th key={'decline'}>Отменить</th>
-                                <th key={'more'}>Подробнее</th>
-                                {/* 1 3 4 7 8 9  0 2 5 6 */}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {requests?.map((request, index) => (
-                                <tr key={index}>
-                                    {Object.values(request).map((value, index) => {
-                                        const excludedIndices = [0, 2];
-                                        const timeRows = [3, 4, 8]
-                                        if (index === 1) return <td key={index}>{statusDictionary[value as keyof typeof statusDictionary] as React.ReactNode}</td>
-                                        return excludedIndices.includes(index) ? null :
-                                            timeRows.includes(index) ? <td key={index}>{formattedTime(value as string) as React.ReactNode}</td> :
-                                                <td key={index}>{value as React.ReactNode}</td>;
-                                    })}
-                                    {request.Status === 'ended' || request.Status === "canceled" ?
-                                        <>
-                                            <td>Заявка закончена</td>
-                                            <td>Заявка закончена</td>
-                                            <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
-                                        </> :
-                                        <>
-                                            <td><Button variant="primary" onClick={() => { handleChangeStatus(request.Id, 'ended') }}>
-                                                Закончить
-                                            </Button></td>
-                                            <td><Button variant="danger" onClick={() => { handleChangeStatus(request.Id, 'canceled') }}>
-                                                Отменить
-                                            </Button></td>
-                                            <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
-                                            
-                                        </>}
+                    <div className='table-responsive'>
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th key={'status'}>Статус</th>
+                                    <th key={'formDate'}>Сформирована</th>
+                                    <th key={'endDate'}>Закончена</th>
+                                    <th key={'userName'}>Имя отправителя</th>
+                                    <th key={'moderatorName'}>Имя модератора</th>
+                                    <th key={'consPlace'}>Место консультации</th>
+                                    <th key={'consTime'}>Время консультации</th>
+                                    <th key={'companyName'}>Компания</th>
+                                    <th key={'end'}>Закончить</th>
+                                    <th key={'decline'}>Отменить</th>
+                                    <th key={'more'}>Подробнее</th>
+                                    {/* 1 3 4 7 8 9  0 2 5 6 */}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </Table>}
+                            </thead>
+                            <tbody>
+                                {requests?.map((request, index) => (
+                                    <tr key={index}>
+                                        {Object.values(request).map((value, index) => {
+                                            const excludedIndices = [0, 2];
+                                            const timeRows = [3, 4, 8]
+                                            if (index === 1) return <td key={index}>{statusDictionary[value as keyof typeof statusDictionary] as React.ReactNode}</td>
+                                            return excludedIndices.includes(index) ? null :
+                                                timeRows.includes(index) ? <td key={index}>{formattedTime(value as string) as React.ReactNode}</td> :
+                                                    <td key={index}>{value as React.ReactNode}</td>;
+                                        })}
+                                        {request.Status === 'ended' || request.Status === "canceled" ?
+                                            <>
+                                                <td>Заявка закончена</td>
+                                                <td>Заявка закончена</td>
+                                                <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
+                                            </> :
+                                            <>
+                                                <td><Button variant="primary" onClick={() => { handleChangeStatus(request.Id, 'ended') }}>
+                                                    Закончить
+                                                </Button></td>
+                                                <td><Button variant="danger" onClick={() => { handleChangeStatus(request.Id, 'canceled') }}>
+                                                    Отменить
+                                                </Button></td>
+                                                <td><Link to={`/request/${request.Id}`}>Подробнее</Link></td>
+
+                                            </>}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </div>}
             </div>
         </div>
     );

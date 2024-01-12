@@ -62,7 +62,7 @@ const CreateConsModal = () => {
         <div>
             <Navbar />
             <div style={{ marginLeft: "5%", marginTop: "1%" }}>
-                <Link to="/" style={{ textDecoration: 'none' }}>Главная </Link>
+                <Link to="/main-page/admin" style={{ textDecoration: 'none' }}>Главная </Link>
                 <Link to="#" style={{ textDecoration: 'none', color: 'grey' }}>
                     / Создание консультации
                 </Link>
