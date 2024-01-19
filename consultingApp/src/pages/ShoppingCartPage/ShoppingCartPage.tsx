@@ -12,6 +12,7 @@ import { setNumOfProdInReq, setActiveRequestID } from '../../redux/filterAndActi
 import { loginSuccess, loginFailure, setRole } from '../../redux/auth/authSlice';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import './styles.css'
 import moment from 'moment';
 import axios from 'axios';
 
@@ -197,7 +198,8 @@ const ShoppingCartPage: React.FC = () => {
       <>
         {cartItems.Status == 'active' ?
           <h2>Корзина</h2> : <h2>Информация о заявке</h2>}
-        <div style={{ display: 'flex' }}>
+        <div className="container container-com">
+        <div className="cart-container">
           <Table striped bordered hover style={{ width: 'fit-content' }}>
             <thead >
               <tr style={{ height: '50px' }}>
@@ -213,9 +215,14 @@ const ShoppingCartPage: React.FC = () => {
               ))}
             </tbody>
           </Table>
-
           {cartItems.Status == 'active' ?
-            <Form style={{ width: '30%', marginLeft: '5%' }}>
+          <Button variant="danger" onClick={handleDeleteCart}>
+            Очистить корзину
+          </Button> : <> </>}
+                </div>
+          {cartItems.Status == 'active' ?
+          <div className="form-container">
+            <Form style={{ width: '50%', marginLeft: '5%' }}>
               <FormLabel className='small-h1'>Заполните форму для отправки заявки</FormLabel>
               <Form.Group className="mb-3" controlId="formAdditionalField1">
                 <Form.Label>Название компании</Form.Label>
@@ -256,12 +263,9 @@ const ShoppingCartPage: React.FC = () => {
               <Button variant="primary" style={{ width: '100%' }} onClick={() => handleFormRequest(companyName, consultationPlace, consultationTime)}>
                 Отправить
               </Button>
-            </Form> : <></>}
+            </Form> </div>: <></>}
         </div>
-        {cartItems.Status == 'active' ?
-          <Button variant="danger" onClick={handleDeleteCart}>
-            Очистить корзину
-          </Button> : <> </>}
+        
 
       </>
     );
@@ -300,7 +304,7 @@ const ShoppingCartPage: React.FC = () => {
             / Корзина
           </Link>}
       </div>
-      {cartItems.ConsultationInf?.length > 0 ? <> <div style={{ 'marginTop': '5%', 'marginLeft': '5%', 'marginRight': '5%' }}>
+      {cartItems.ConsultationInf?.length > 0 ? <> <div style={{ 'marginTop': '2%', 'marginLeft': '5%', 'marginRight': '5%' }}>
         {renderCart()}
       </div> </> :
         <Loader />}

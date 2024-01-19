@@ -54,17 +54,17 @@ const Card: React.FC<CardProps> = (props) => {
     };
 
     return (
-
+        <div className='card-wrapper'>
         <CardBootstrap className="card-container" style={{ width: '18rem', marginTop: '3rem', margin: '8% 10% 5% 10%' }}>
             <Link className='link' to={`/consultations/${props.id}`}>
-                <CardBootstrap.Img variant="top" src={props.image} />
-                <CardBootstrap.Body>
-                    <CardBootstrap.Title >{props.name} </CardBootstrap.Title>
-                    <CardBootstrap.Text >
+                <CardBootstrap.Img className='card-img' variant="top" src={props.image}  />
+                <CardBootstrap.Body className='card-info'>
+                    <CardBootstrap.Title className='card-title'>{props.name} </CardBootstrap.Title>
+                    <CardBootstrap.Text className='card-description'>
                         {truncatedDescription}
                     </CardBootstrap.Text>
                     <>
-                        <Button variant="primary" onClick={handleAddToCard}>Провести</Button>
+                        <Button className='card-btn' variant="primary" onClick={handleAddToCard}>Провести</Button>
                         <CardBootstrap.Text style={{ display: 'inline-block', fontWeight: 'bold', marginTop: '2%', marginLeft: '5%' }}>
                             {props.price} рублей
                         </CardBootstrap.Text>
@@ -72,7 +72,7 @@ const Card: React.FC<CardProps> = (props) => {
                 </CardBootstrap.Body>
             </Link>
         </CardBootstrap>
-
+        </div>
     );
 }
 

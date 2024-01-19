@@ -1,12 +1,37 @@
 .link {
-    text-decoration: none;
-    color: black
+  text-decoration: none;
+  color: black;
+}
+
+.card-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 320px;
 }
 
 .card-container {
-    transition: transform 0.3s ease-in-out;
-  }
-  
-.card-container:hover {
-    transform: scale(1.05);
+  flex: 1 1 300px;
+  transition: transform 0.3s ease-in-out;
 }
+
+.card-container:hover {
+  transform: scale(1.05);
+}
+
+.card-title {
+  min-height: 48px;
+  overflow: hidden;
+}
+
+.card-description {
+  min-height: 80px;
+}
+
+@media (max-width: 752px) {
+    .card-title, .card-description {
+        min-height: fit-content;
+        height: auto;
+      }    
+}
+
+
